@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Volleyball SR Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      background: #f5f5f5;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    label {
+      font-size: 0.9rem;
+    }
+    input {
+      padding: 6px 8px;
+      font-size: 0.9rem;
+    }
+    button {
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .set-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 10px 0;
+    }
+    #set-buttons button {
+      padding: 8px 12px;
+      margin: 2px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #e0e0e0;
+    }
+    #set-buttons button.active-set {
+      background: #4285f4;
+      color: white;
+    }
+
+    .controls-touch {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .controls-touch section {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .controls-touch h3 {
+      margin: 0 0 6px 0;
+      font-size: 1rem;
+    }
+
+    .team-btn,
+    .rating-buttons button,
+    #player-buttons button,
+    .danger-btn,
+    .utility-btn {
+      padding: 14px 18px;
+      margin: 4px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: 2px solid #333;
+      background: #e0e0e0;
+    }
+
+    .team-btn {
+      width: 130px;
+      font-weight: bold;
+    }
+    .team-btn.active {
+      background: #7bc96f;
+      color: white;
+    }
+
+    .rating-buttons button {
+      width: 60px;
+      font-weight: bold;
+      background: #f2f2f2;
+    }
+
+    #player-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    #player-buttons button {
+      background: #f0f0f0;
+      width: 70px;
+    }
+    #player-buttons button.active-player {
+      background: #7bc96f;
+      color: white;
+    }
+
+    .danger-btn {
+      background: #d9534f;
+      color: white;
+      border-color: #b52b27;
+    }
+    .utility-btn {
+      background: #0275d8;
+      color: white;
+      border-color: #01549b;
+    }
+
+    .teams {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .team-box {
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px;
+      flex: 1 1 260px;
+      min-width: 260px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .team-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+    .team-summary {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 3px;
+      text-align: center;
+    }
+    th {
+      background: #eee;
+    }
+    #message {
+      font-size: 0.9rem;
+      min-height: 1.2em;
+      margin-bottom: 4px;
+    }
+
+    @media (min-width: 768px) {
+      .controls-touch {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      #player-buttons button {
+        width: 80px;
+        font-size: 1.2rem;
+      }
+      .rating-buttons button {
+        width: 70px;
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Volleyball Serve Receive Tracker</h1>
+
+  <!-- Team name inputs -->
+  <div class="row">
+    <div>
+      <label>Team 1 Name:
+        <input id="team1-name" type="text" placeholder="Team 1" />
+      </label>
+    </div>
+    <div>
+      <label>Team 2 Name:
+        <input id="team2-name" type="text" placeholder="Team 2" />
+      </label>
+    </div>
+    <button class="utility-btn" onclick="applyTeamNames()">Set Names</button>
+  </div>
+
+  <!-- Set selection bar -->
+  <div class="set-bar">
+    <strong>Sets:</strong>
+    <div id="set-buttons"></div>
+    <button class="utility-btn" onclick="addSet()">+ Add Set</button>
+  </div>
+
+  <div id="message"></div>
+
+  <!-- Touch-friendly controls -->
+  <div class="controls-touch">
+    <section>
+      <h3>Team</h3>
+      <button class="team-btn" onclick="setTeam(1)" id="btn-team1">Team 1</button>
+      <button class="team-btn" onclick="setTeam(2)" id="btn-team2">Team 2</button>
+    </section>
+
+    <section>
+      <h3>Players (tap to select)</h3>
+      <div id="player-buttons"></div>
+      <button class="utility-btn" onclick="addPlayerPrompt()">+ Add Player</button>
+    </section>
+
+    <section>
+      <h3>Pass Rating</h3>
+      <div class="rating-buttons">
+        <button onclick="rate(0)">0</button>
+        <button onclick="rate(1)">1</button>
+        <button onclick="rate(2)">2</button>
+        <button onclick="rate(3)">3</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>Actions</h3>
+      <button class="danger-btn" onclick="undo()">Undo</button><br/>
+      <button class="danger-btn" onclick="resetCurrentSet()">Reset Set</button><br/>
+      <button class="danger-btn" onclick="resetAll()">Reset Match</button><br/>
+      <button class="utility-btn" onclick="downloadCSV()">Download CSV</button>
+    </section>
+  </div>
+
+  <!-- Team boards -->
+  <div class="teams" id="teams-container"></div>
+
+  <script>
+    // Use only var + classic functions for maximum compatibility
+
+    var teamNames = { 1: "Team 1", 2: "Team 2" };
+    var rosters = { 1: [], 2: [] }; // jersey arrays
+
+    function createEmptyTeam(name) {
+      return {
+        name: name,
+        totalPasses: 0,
+        totalScore: 0,
+        players: {} // jersey -> stats
+      };
+    }
+
+    function createEmptySet() {
+      return {
+        teams: {
+          1: createEmptyTeam(teamNames[1]),
+          2: createEmptyTeam(teamNames[2])
+        }
+      };
+    }
+
+    var appState = {
+      currentSetIndex: 0,
+      sets: [createEmptySet()],
+      selectedTeam: 1,
+      selectedPlayer: null,
+      history: [] // {setIndex, teamId, jersey, rating}
+    };
+
+    function currentSet() {
+      return appState.sets[appState.currentSetIndex];
+    }
+
+    function sr(score, total) {
+      if (!total) return 0;
+      return score / total;
+    }
+
+    // -------- TEAM NAMES ----------
+    function applyTeamNames() {
+      var t1 = document.getElementById("team1-name").value.replace(/^\s+|\s+$/g, "");
+      var t2 = document.getElementById("team2-name").value.replace(/^\s+|\s+$/g, "");
+      if (t1) teamNames[1] = t1;
+      if (t2) teamNames[2] = t2;
+
+      for (var i = 0; i < appState.sets.length; i++) {
+        appState.sets[i].teams[1].name = teamNames[1];
+        appState.sets[i].teams[2].name = teamNames[2];
+      }
+
+      setMessage("Team names updated.");
+      render();
+    }
+
+    // -------- SET HANDLING ----------
+    function renderSetButtons() {
+      var container = document.getElementById("set-buttons");
+      container.innerHTML = "";
+      for (var i = 0; i < appState.sets.length; i++) {
+        (function(idx) {
+          var btn = document.createElement("button");
+          btn.textContent = "Set " + (idx + 1);
+          if (idx === appState.currentSetIndex) {
+            btn.className = "active-set";
+          }
+          btn.onclick = function() {
+            appState.currentSetIndex = idx;
+            appState.selectedPlayer = null;
+            setMessage("Switched to Set " + (idx + 1));
+            render();
+          };
+          container.appendChild(btn);
+        })(i);
+      }
+    }
+
+    function addSet() {
+      appState.sets.push(createEmptySet());
+      appState.currentSetIndex = appState.sets.length - 1;
+      appState.selectedPlayer = null;
+      setMessage("Added Set " + (appState.currentSetIndex + 1));
+      render();
+    }
+
+    function resetCurrentSet() {
+      if (!confirm("Reset stats for current set only?")) return;
+      var idx = appState.currentSetIndex;
+      appState.sets[idx] = createEmptySet();
+
+      // Remove history entries for this set
+      var newHist = [];
+      for (var i = 0; i < appState.history.length; i++) {
+        if (appState.history[i].setIndex !== idx) {
+          newHist.push(appState.history[i]);
+        }
+      }
+      appState.history = newHist;
+      appState.selectedPlayer = null;
+      setMessage("Current set reset.");
+      render();
+    }
+
+    function resetAll() {
+      if (!confirm("Reset ALL sets, stats, and rosters?")) return;
+      appState.sets = [createEmptySet()];
+      appState.currentSetIndex = 0;
+      appState.selectedTeam = 1;
+      appState.selectedPlayer = null;
+      appState.history = [];
+      rosters[1] = [];
+      rosters[2] = [];
+      setMessage("Match reset.");
+      render();
+    }
+
+    // -------- TEAM / PLAYER SELECTION ----------
+    function setTeam(teamId) {
+      appState.selectedTeam = teamId;
+      appState.selectedPlayer = null;
+      setMessage("Selected " + teamNames[teamId]);
+      render();
+    }
+
+    function rosterContains(list, jersey) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i] === jersey) return true;
+      }
+      return false;
+    }
+
+    function addPlayerPrompt() {
+      var num = prompt("Enter player jersey number:");
+      if (!num) return;
+      var jersey = parseInt(num, 10);
+      if (isNaN(jersey)) {
+        setMessage("Invalid jersey number.");
+        return;
+      }
+      var list = rosters[appState.selectedTeam];
+      if (!rosterContains(list, jersey)) {
+        list.push(jersey);
+      }
+      setMessage("Player #" + jersey + " added to " + teamNames[appState.selectedTeam]);
+      render();
+    }
+
+    function selectPlayer(jersey) {
+      appState.selectedPlayer = jersey;
+      setMessage("Selected Player #" + jersey);
+      render();
+    }
+
+    // -------- PASS INPUT ----------
+    function rate(rating) {
+      var teamId = appState.selectedTeam;
+      var jersey = appState.selectedPlayer;
+      if (jersey === null) {
+        setMessage("Choose a player first.");
+        return;
+      }
+      if (rating < 0 || rating > 3) return;
+      addPassTouch(teamId, jersey, rating);
+    }
+
+    function addPassTouch(teamId, jersey, rating) {
+      var setIdx = appState.currentSetIndex;
+      var set = currentSet();
+      var team = set.teams[teamId];
+
+      if (!team.players[jersey]) {
+        team.players[jersey] = {
+          total: 0,
+          score: 0,
+          counts: [0, 0, 0, 0]
+        };
+      }
+      var p = team.players[jersey];
+      p.total += 1;
+      p.score += rating;
+      p.counts[rating] += 1;
+      team.totalPasses += 1;
+      team.totalScore += rating;
+
+      appState.history.push({
+        setIndex: setIdx,
+        teamId: teamId,
+        jersey: jersey,
+        rating: rating
+      });
+      setMessage("+ " + team.name + ", #" + jersey + ", rating " + rating);
+      render();
+    }
+
+    function undo() {
+      if (appState.history.length === 0) {
+        setMessage("Nothing to undo.");
+        return;
+      }
+      var last = appState.history.pop();
+      var set = appState.sets[last.setIndex];
+      var team = set.teams[last.teamId];
+      var p = team.players[last.jersey];
+      if (!p) {
+        setMessage("Undo error.");
+        return;
+      }
+      p.total -= 1;
+      p.score -= last.rating;
+      p.counts[last.rating] -= 1;
+      team.totalPasses -= 1;
+      team.totalScore -= last.rating;
+      if (p.total <= 0) {
+        delete team.players[last.jersey];
+      }
+      setMessage("Undid: " + team.name + ", #" + last.jersey + ", rating " + last.rating);
+      render();
+    }
+
+    // -------- RENDERING ----------
+    function renderPlayerButtons() {
+      var container = document.getElementById("player-buttons");
+      container.innerHTML = "";
+      var list = rosters[appState.selectedTeam];
+      if (!list || list.length === 0) {
+        var span = document.createElement("span");
+        span.textContent = "No players yet. Tap + Add Player.";
+        container.appendChild(span);
+        return;
+      }
+      var sorted = list.slice(0);
+      sorted.sort(function(a, b) { return a - b; });
+      for (var i = 0; i < sorted.length; i++) {
+        (function(jersey) {
+          var btn = document.createElement("button");
+          btn.textContent = jersey;
+          if (appState.selectedPlayer === jersey) {
+            btn.className = "active-player";
+          }
+          btn.onclick = function() {
+            selectPlayer(jersey);
+          };
+          container.appendChild(btn);
+        })(sorted[i]);
+      }
+    }
+
+    function renderTeams() {
+      var container = document.getElementById("teams-container");
+      container.innerHTML = "";
+
+      var set = currentSet();
+      for (var id = 1; id <= 2; id++) {
+        var team = set.teams[id];
+
+        var box = document.createElement("div");
+        box.className = "team-box";
+
+        var header = document.createElement("div");
+        header.className = "team-header";
+
+        var nameEl = document.createElement("h2");
+        nameEl.textContent = team.name;
+
+        var srEl = document.createElement("div");
+        srEl.textContent = "SR: " + sr(team.totalScore, team.totalPasses).toFixed(2);
+
+        header.appendChild(nameEl);
+        header.appendChild(srEl);
+        box.appendChild(header);
+
+        var summary = document.createElement("div");
+        summary.className = "team-summary";
+        summary.textContent = "Passes: " + team.totalPasses + " | Total: " + team.totalScore;
+        box.appendChild(summary);
+
+        var table = document.createElement("table");
+        var thead = document.createElement("thead");
+        thead.innerHTML = "<tr><th>#</th><th>Passes</th><th>SR</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>";
+        table.appendChild(thead);
+
+        var tbody = document.createElement("tbody");
+
+        var jerseys = [];
+        for (var key in team.players) {
+          if (team.players.hasOwnProperty(key)) {
+            jerseys.push(parseInt(key, 10));
+          }
+        }
+        jerseys.sort(function(a, b) { return a - b; });
+
+        if (jerseys.length === 0) {
+          var trEmpty = document.createElement("tr");
+          var tdEmpty = document.createElement("td");
+          tdEmpty.colSpan = 7;
+          tdEmpty.textContent = "(no passes yet)";
+          trEmpty.appendChild(tdEmpty);
+          tbody.appendChild(trEmpty);
+        } else {
+          for (var j = 0; j < jerseys.length; j++) {
+            var jersey = jerseys[j];
+            var p = team.players[jersey];
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+              "<td>" + jersey + "</td>" +
+              "<td>" + p.total + "</td>" +
+              "<td>" + sr(p.score, p.total).toFixed(2) + "</td>" +
+              "<td>" + p.counts[0] + "</td>" +
+              "<td>" + p.counts[1] + "</td>" +
+              "<td>" + p.counts[2] + "</td>" +
+              "<td>" + p.counts[3] + "</td>";
+            tbody.appendChild(tr);
+          }
+        }
+
+        table.appendChild(tbody);
+        box.appendChild(table);
+        container.appendChild(box);
+      }
+    }
+
+    function render() {
+      renderSetButtons();
+
+      var btn1 = document.getElementById("btn-team1");
+      var btn2 = document.getElementById("btn-team2");
+      btn1.textContent = teamNames[1];
+      btn2.textContent = teamNames[2];
+
+      btn1.className = "team-btn";
+      btn2.className = "team-btn";
+      if (appState.selectedTeam === 1) btn1.className += " active";
+      if (appState.selectedTeam === 2) btn2.className += " active";
+
+      renderPlayerButtons();
+      renderTeams();
+    }
+
+    function setMessage(msg) {
+      document.getElementById("message").textContent = msg;
+    }
+
+    // -------- CSV EXPORT ----------
+    function downloadCSV() {
+      var rows = [];
+      rows.push(["Set", "Team", "Jersey", "Passes", "Score", "SR", "Count0", "Count1", "Count2", "Count3"]);
+
+      for (var s = 0; s < appState.sets.length; s++) {
+        var set = appState.sets[s];
+        for (var teamId = 1; teamId <= 2; teamId++) {
+          var team = set.teams[teamId];
+          var jerseys = [];
+          for (var key in team.players) {
+            if (team.players.hasOwnProperty(key)) {
+              jerseys.push(parseInt(key, 10));
+            }
+          }
+          jerseys.sort(function(a, b) { return a - b; });
+          for (var j = 0; j < jerseys.length; j++) {
+            var jersey = jerseys[j];
+            var p = team.players[jersey];
+            rows.push([
+              "Set " + (s + 1),
+              team.name,
+              jersey,
+              p.total,
+              p.score,
+              sr(p.score, p.total).toFixed(3),
+              p.counts[0],
+              p.counts[1],
+              p.counts[2],
+              p.counts[3]
+            ]);
+          }
+        }
+      }
+
+      var csvContent = "";
+      for (var r = 0; r < rows.length; r++) {
+        csvContent += rows[r].join(",") + "\n";
+      }
+
+      var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      var url = URL.createObjectURL(blob);
+
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "sr_stats.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setMessage("CSV downloaded.");
+    }
+
+    // -------- INIT ----------
+    document.getElementById("team1-name").value = teamNames[1];
+    document.getElementById("team2-name").value = teamNames[2];
+    render();
+  </script>
+</body>
+</html>
