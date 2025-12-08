@@ -87,8 +87,7 @@
       font-weight: bold;
     }
     .team-btn.active {
-      background: #7bc96f;
-      color: white;
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.3);
     }
 
     .rating-buttons button {
@@ -169,6 +168,68 @@
       margin-bottom: 4px;
     }
 
+    /* Match stats box */
+    .match-summary-box {
+      display: none;
+      margin-top: 10px;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 0.9rem;
+    }
+    .match-summary-box table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+    .match-summary-box th,
+    .match-summary-box td {
+      border-bottom: 1px solid #ccc;
+      padding: 3px;
+      text-align: center;
+    }
+
+    /* Color picker overlay */
+    .color-picker-overlay {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .color-picker-overlay.show {
+      display: flex;
+    }
+    .color-picker-inner {
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 320px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0;
+      justify-content: center;
+    }
+    .color-swatch-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      border: 2px solid #333;
+    }
+
     @media (min-width: 768px) {
       .controls-touch {
         flex-direction: row;
@@ -208,6 +269,7 @@
     <strong>Sets:</strong>
     <div id="set-buttons"></div>
     <button class="utility-btn" onclick="addSet()">+ Add Set</button>
+    <button id="match-stats-btn" class="utility-btn" onclick="toggleMatchStats()">Show Match Stats</button>
   </div>
 
   <div id="message"></div>
@@ -218,13 +280,17 @@
       <h3>Team</h3>
       <button class="team-btn" onclick="setTeam(1)" id="btn-team1">Team 1</button>
       <button class="team-btn" onclick="setTeam(2)" id="btn-team2">Team 2</button>
+      <div style="margin-top:6px;">
+        <button class="utility-btn" onclick="openColorPicker(1)">Color T1</button>
+        <button class="utility-btn" onclick="openColorPicker(2)">Color T2</button>
+      </div>
     </section>
 
     <section>
       <h3>Players (tap to select)</h3>
       <div id="player-buttons"></div>
 
-      <!-- Jersey input: number pad only, one-and-done entry -->
+      <!-- Jersey input: numeric keypad on iPad, one-and-done -->
       <div style="margin-top:6px;">
         <button class="utility-btn" onclick="showJerseyInput()">+ Add Player</button>
         <input
@@ -266,11 +332,36 @@
   <!-- Team boards -->
   <div class="teams" id="teams-container"></div>
 
-  <script>
-    // Use only var + classic functions for maximum compatibility
+  <!-- Match stats (all sets) -->
+  <div id="match-summary" class="match-summary-box"></div>
 
+  <!-- Color picker overlay -->
+  <div id="color-picker" class="color-picker-overlay">
+    <div class="color-picker-inner">
+      <div>Choose color for <span id="color-team-label"></span></div>
+      <div class="color-swatches">
+        <button class="color-swatch-btn" data-color="#e53935" style="background:#e53935;"></button>
+        <button class="color-swatch-btn" data-color="#3949ab" style="background:#3949ab;"></button>
+        <button class="color-swatch-btn" data-color="#00897b" style="background:#00897b;"></button>
+        <button class="color-swatch-btn" data-color="#f9a825" style="background:#f9a825;"></button>
+        <button class="color-swatch-btn" data-color="#6a1b9a" style="background:#6a1b9a;"></button>
+        <button class="color-swatch-btn" data-color="#5d4037" style="background:#5d4037;"></button>
+        <button class="color-swatch-btn" data-color="#607d8b" style="background:#607d8b;"></button>
+        <button class="color-swatch-btn" data-color="#000000" style="background:#000000;"></button>
+        <button class="color-swatch-btn" data-color="#ffffff" style="background:#ffffff;"></button>
+      </div>
+      <button class="utility-btn" onclick="closeColorPicker()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // ----- STATE -----
     var teamNames = { 1: "Team 1", 2: "Team 2" };
     var rosters = { 1: [], 2: [] }; // jersey arrays
+
+    var teamColors = { 1: "#7bc96f", 2: "#4285f4" };
+    var matchStatsVisible = false;
+    var colorPickerTeam = null;
 
     function createEmptyTeam(name) {
       return {
@@ -307,7 +398,7 @@
       return score / total;
     }
 
-    // -------- TEAM NAMES ----------
+    // ----- TEAM NAMES -----
     function applyTeamNames() {
       var t1 = document.getElementById("team1-name").value.replace(/^\s+|\s+$/g, "");
       var t2 = document.getElementById("team2-name").value.replace(/^\s+|\s+$/g, "");
@@ -323,7 +414,7 @@
       render();
     }
 
-    // -------- SET HANDLING ----------
+    // ----- SETS -----
     function renderSetButtons() {
       var container = document.getElementById("set-buttons");
       container.innerHTML = "";
@@ -358,7 +449,7 @@
       var idx = appState.currentSetIndex;
       appState.sets[idx] = createEmptySet();
 
-      // Remove history entries for this set
+      // prune history entries for this set
       var newHist = [];
       for (var i = 0; i < appState.history.length; i++) {
         if (appState.history[i].setIndex !== idx) {
@@ -384,7 +475,7 @@
       render();
     }
 
-    // -------- TEAM / PLAYER SELECTION ----------
+    // ----- TEAM / PLAYER -----
     function setTeam(teamId) {
       appState.selectedTeam = teamId;
       appState.selectedPlayer = null;
@@ -399,17 +490,16 @@
       return false;
     }
 
-    // NEW: show jersey input (brings up numeric keypad)
+    // numeric keypad jersey flow
     function showJerseyInput() {
       var input = document.getElementById("jersey-input");
       var btn = document.getElementById("jersey-submit");
       input.style.display = "inline-block";
       btn.style.display = "inline-block";
       input.value = "";
-      input.focus(); // iPad will show number pad because of type="tel" + inputmode="numeric"
+      input.focus(); // number pad on iPad
     }
 
-    // NEW: submit jersey once, then hide input + button
     function submitJersey() {
       var input = document.getElementById("jersey-input");
       var num = input.value;
@@ -429,7 +519,6 @@
         list.push(jersey);
       }
 
-      // one-and-done: hide input + button and clear value
       input.value = "";
       input.style.display = "none";
       document.getElementById("jersey-submit").style.display = "none";
@@ -438,7 +527,13 @@
       render();
     }
 
-    // -------- PASS INPUT ----------
+    function selectPlayer(jersey) {
+      appState.selectedPlayer = jersey;
+      setMessage("Selected Player #" + jersey);
+      render();
+    }
+
+    // ----- PASS INPUT -----
     function rate(rating) {
       var teamId = appState.selectedTeam;
       var jersey = appState.selectedPlayer;
@@ -504,7 +599,7 @@
       render();
     }
 
-    // -------- RENDERING ----------
+    // ----- RENDER PLAYERS & TEAMS -----
     function renderPlayerButtons() {
       var container = document.getElementById("player-buttons");
       container.innerHTML = "";
@@ -530,12 +625,6 @@
           container.appendChild(btn);
         })(sorted[i]);
       }
-    }
-
-    function selectPlayer(jersey) {
-      appState.selectedPlayer = jersey;
-      setMessage("Selected Player #" + jersey);
-      render();
     }
 
     function renderTeams() {
@@ -612,6 +701,129 @@
       }
     }
 
+    // ----- MATCH SUMMARY (ALL SETS) -----
+    function renderMatchSummary() {
+      var box = document.getElementById("match-summary");
+      if (!matchStatsVisible) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+      box.style.display = "block";
+
+      var totals = {
+        1: { passes: 0, score: 0 },
+        2: { passes: 0, score: 0 }
+      };
+      var playersAgg = { 1: {}, 2: {} };
+
+      for (var s = 0; s < appState.sets.length; s++) {
+        var set = appState.sets[s];
+        for (var t = 1; t <= 2; t++) {
+          var team = set.teams[t];
+          totals[t].passes += team.totalPasses;
+          totals[t].score  += team.totalScore;
+
+          var teamPlayers = team.players;
+          for (var key in teamPlayers) {
+            if (teamPlayers.hasOwnProperty(key)) {
+              var jersey = key;
+              var p = teamPlayers[key];
+              if (!playersAgg[t][jersey]) {
+                playersAgg[t][jersey] = { passes: 0, score: 0 };
+              }
+              playersAgg[t][jersey].passes += p.total;
+              playersAgg[t][jersey].score  += p.score;
+            }
+          }
+        }
+      }
+
+      var sr1 = sr(totals[1].score, totals[1].passes).toFixed(2);
+      var sr2 = sr(totals[2].score, totals[2].passes).toFixed(2);
+
+      var html = "<strong>Match Totals (All Sets)</strong><br>";
+      html += teamNames[1] + ": Passes " + totals[1].passes +
+              " | Total " + totals[1].score +
+              " | SR " + sr1 + "<br>";
+      html += teamNames[2] + ": Passes " + totals[2].passes +
+              " | Total " + totals[2].score +
+              " | SR " + sr2 + "<br><br>";
+
+      html += "<strong>Players (All Sets)</strong><br>";
+
+      for (var t = 1; t <= 2; t++) {
+        html += "<em>" + teamNames[t] + "</em>";
+        html += "<table>";
+        html += "<tr><th>#</th><th>Passes</th><th>SR</th></tr>";
+        var jerseys = [];
+        for (var key in playersAgg[t]) {
+          if (playersAgg[t].hasOwnProperty(key)) {
+            jerseys.push(parseInt(key, 10));
+          }
+        }
+        jerseys.sort(function(a, b) { return a - b; });
+        if (jerseys.length === 0) {
+          html += "<tr><td colspan='3'>No passes yet</td></tr>";
+        } else {
+          for (var j = 0; j < jerseys.length; j++) {
+            var jersey = jerseys[j];
+            var pl = playersAgg[t][jersey];
+            html += "<tr><td>" + jersey + "</td><td>" +
+                    pl.passes + "</td><td>" +
+                    sr(pl.score, pl.passes).toFixed(2) +
+                    "</td></tr>";
+          }
+        }
+        html += "</table>";
+      }
+
+      box.innerHTML = html;
+    }
+
+    function toggleMatchStats() {
+      matchStatsVisible = !matchStatsVisible;
+      var msBtn = document.getElementById("match-stats-btn");
+      if (msBtn) {
+        msBtn.textContent = matchStatsVisible ? "Hide Match Stats" : "Show Match Stats";
+      }
+      renderMatchSummary();
+    }
+
+    // ----- COLORS -----
+    function openColorPicker(teamId) {
+      colorPickerTeam = teamId;
+      document.getElementById("color-team-label").textContent = teamNames[teamId];
+      document.getElementById("color-picker").classList.add("show");
+    }
+
+    function closeColorPicker() {
+      colorPickerTeam = null;
+      document.getElementById("color-picker").classList.remove("show");
+    }
+
+    function initColorPicker() {
+      var overlay = document.getElementById("color-picker");
+      var swatches = overlay.querySelectorAll(".color-swatch-btn");
+      for (var i = 0; i < swatches.length; i++) {
+        swatches[i].onclick = function() {
+          if (colorPickerTeam === null) return;
+          var col = this.getAttribute("data-color");
+          teamColors[colorPickerTeam] = col;
+          render();
+          closeColorPicker();
+        };
+      }
+    }
+
+    function applyTeamColors() {
+      var btn1 = document.getElementById("btn-team1");
+      var btn2 = document.getElementById("btn-team2");
+      if (btn1) btn1.style.backgroundColor = teamColors[1];
+      if (btn2) btn2.style.backgroundColor = teamColors[2];
+    }
+
+    // ----- RENDER ROOT -----
     function render() {
       renderSetButtons();
 
@@ -625,15 +837,17 @@
       if (appState.selectedTeam === 1) btn1.className += " active";
       if (appState.selectedTeam === 2) btn2.className += " active";
 
+      applyTeamColors();
       renderPlayerButtons();
       renderTeams();
+      renderMatchSummary();
     }
 
     function setMessage(msg) {
       document.getElementById("message").textContent = msg;
     }
 
-    // -------- CSV EXPORT ----------
+    // ----- CSV EXPORT -----
     function downloadCSV() {
       var rows = [];
       rows.push(["Set", "Team", "Jersey", "Passes", "Score", "SR", "Count0", "Count1", "Count2", "Count3"]);
@@ -687,9 +901,10 @@
       setMessage("CSV downloaded.");
     }
 
-    // -------- INIT ----------
+    // ----- INIT -----
     document.getElementById("team1-name").value = teamNames[1];
     document.getElementById("team2-name").value = teamNames[2];
+    initColorPicker();
     render();
   </script>
 </body>
