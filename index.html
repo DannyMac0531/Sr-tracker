@@ -21,17 +21,9 @@
       margin-bottom: 8px;
       align-items: center;
     }
-    label {
-      font-size: 0.9rem;
-    }
-    input {
-      padding: 6px 8px;
-      font-size: 0.9rem;
-    }
-    button {
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
+    label { font-size: 0.9rem; }
+    input { padding: 6px 8px; font-size: 0.9rem; }
+    button { cursor: pointer; font-size: 0.95rem; }
 
     .set-bar {
       display: flex;
@@ -50,6 +42,73 @@
     #set-buttons button.active-set {
       background: #4285f4;
       color: white;
+    }
+
+    /* Set meta (score + timeouts) */
+    .set-meta {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+    }
+    .set-meta h3 {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+    }
+    .set-meta-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .set-meta-card {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      min-width: 260px;
+      flex: 1 1 260px;
+    }
+    .score-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .score-row input {
+      width: 80px;
+      font-size: 1.05rem;
+    }
+    .muted {
+      color: #666;
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+    .to-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .to-group {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .to-group input[type="checkbox"]{
+      transform: scale(1.5);
+      margin-right: 4px;
+    }
+    .to-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #fff;
     }
 
     .controls-touch {
@@ -159,9 +218,8 @@
       padding: 3px;
       text-align: center;
     }
-    th {
-      background: #eee;
-    }
+    th { background: #eee; }
+
     #message {
       font-size: 0.9rem;
       min-height: 1.2em;
@@ -195,40 +253,41 @@
     /* Color picker overlay */
     .color-picker-overlay {
       position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
+      left: 0; right: 0; top: 0; bottom: 0;
       background: rgba(0,0,0,0.4);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
-    .color-picker-overlay.show {
-      display: flex;
-    }
+    .color-picker-overlay.show { display: flex; }
     .color-picker-inner {
       background: #ffffff;
-      padding: 10px;
-      border-radius: 8px;
-      max-width: 320px;
+      padding: 12px;
+      border-radius: 10px;
+      max-width: 360px;
       font-size: 0.9rem;
       text-align: center;
     }
     .color-swatches {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       gap: 8px;
-      margin: 8px 0;
+      margin: 10px 0;
       justify-content: center;
     }
     .color-swatch-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
       border: 2px solid #333;
+      cursor: pointer;
     }
+
+    /* SR heat colors (low/medium/high) */
+    .sr-low  { background: #ffd6d6; }  /* light red */
+    .sr-med  { background: #fff3b0; }  /* light yellow */
+    .sr-high { background: #d7f7d7; }  /* light green */
 
     @media (min-width: 768px) {
       .controls-touch {
@@ -274,6 +333,51 @@
 
   <div id="message"></div>
 
+  <!-- Set score + timeouts (per set) -->
+  <div class="set-meta">
+    <h3 id="set-meta-title">Set</h3>
+    <div class="set-meta-grid">
+      <div class="set-meta-card">
+        <div class="score-row">
+          <strong>Final Score:</strong>
+          <span id="score-t1-label">Team 1</span>
+          <input id="score-t1" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+          <span>-</span>
+          <span id="score-t2-label">Team 2</span>
+          <input id="score-t2" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
+          <button class="utility-btn" onclick="saveSetScore()">Save</button>
+          <button class="danger-btn" onclick="clearSetScore()">Clear</button>
+        </div>
+        <div class="muted">Enter scores after the set is complete. Saved per set.</div>
+      </div>
+
+      <div class="set-meta-card">
+        <strong>Timeouts (2 per team / set):</strong>
+        <div style="height:8px;"></div>
+
+        <div class="to-row">
+          <div>
+            <div style="font-weight:bold;" id="to-t1-name">Team 1</div>
+            <div class="to-group">
+              <label class="to-label"><input id="to-t1-1" type="checkbox">TO1</label>
+              <label class="to-label"><input id="to-t1-2" type="checkbox">TO2</label>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-weight:bold;" id="to-t2-name">Team 2</div>
+            <div class="to-group">
+              <label class="to-label"><input id="to-t2-1" type="checkbox">TO1</label>
+              <label class="to-label"><input id="to-t2-2" type="checkbox">TO2</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="muted">These checkboxes are tracked separately for each set.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Touch-friendly controls -->
   <div class="controls-touch">
     <section>
@@ -290,7 +394,7 @@
       <h3>Players (tap to select)</h3>
       <div id="player-buttons"></div>
 
-      <!-- Jersey input: numeric keypad on iPad, one-and-done -->
+      <!-- Jersey input: numeric keypad on iPad -->
       <div style="margin-top:6px;">
         <button class="utility-btn" onclick="showJerseyInput()">+ Add Player</button>
         <input
@@ -339,17 +443,7 @@
   <div id="color-picker" class="color-picker-overlay">
     <div class="color-picker-inner">
       <div>Choose color for <span id="color-team-label"></span></div>
-      <div class="color-swatches">
-        <button class="color-swatch-btn" data-color="#e53935" style="background:#e53935;"></button>
-        <button class="color-swatch-btn" data-color="#3949ab" style="background:#3949ab;"></button>
-        <button class="color-swatch-btn" data-color="#00897b" style="background:#00897b;"></button>
-        <button class="color-swatch-btn" data-color="#f9a825" style="background:#f9a825;"></button>
-        <button class="color-swatch-btn" data-color="#6a1b9a" style="background:#6a1b9a;"></button>
-        <button class="color-swatch-btn" data-color="#5d4037" style="background:#5d4037;"></button>
-        <button class="color-swatch-btn" data-color="#607d8b" style="background:#607d8b;"></button>
-        <button class="color-swatch-btn" data-color="#000000" style="background:#000000;"></button>
-        <button class="color-swatch-btn" data-color="#ffffff" style="background:#ffffff;"></button>
-      </div>
+      <div id="color-swatches" class="color-swatches"></div>
       <button class="utility-btn" onclick="closeColorPicker()">Close</button>
     </div>
   </div>
@@ -357,23 +451,31 @@
   <script>
     // ----- STATE -----
     var teamNames = { 1: "Team 1", 2: "Team 2" };
-    var rosters = { 1: [], 2: [] }; // jersey arrays
+    var rosters = { 1: [], 2: [] };
 
     var teamColors = { 1: "#7bc96f", 2: "#4285f4" };
     var matchStatsVisible = false;
     var colorPickerTeam = null;
 
+    // Pastel rainbow + some darker options
+    var COLOR_PALETTE = [
+      "#FFCDD2", "#F8BBD0", "#E1BEE7", "#D1C4E9", "#C5CAE9", "#BBDEFB",
+      "#B3E5FC", "#B2EBF2", "#B2DFDB", "#C8E6C9", "#DCEDC8", "#F0F4C3",
+      "#FFF9C4", "#FFECB3", "#FFE0B2", "#FFCCBC", "#D7CCC8", "#CFD8DC",
+      "#FFEBEE", "#FCE4EC", "#F3E5F5", "#EDE7F6", "#E8EAF6", "#E3F2FD",
+      "#E1F5FE", "#E0F7FA", "#E0F2F1", "#E8F5E9", "#F1F8E9", "#F9FBE7",
+      "#FFFDE7", "#FFF8E1", "#FFF3E0", "#FBE9E7", "#FAFAFA", "#ECEFF1",
+      "#1E88E5", "#43A047", "#8E24AA", "#F4511E", "#6D4C41", "#263238"
+    ];
+
     function createEmptyTeam(name) {
-      return {
-        name: name,
-        totalPasses: 0,
-        totalScore: 0,
-        players: {} // jersey -> stats
-      };
+      return { name: name, totalPasses: 0, totalScore: 0, players: {} };
     }
 
     function createEmptySet() {
       return {
+        score: { 1: "", 2: "" },
+        timeouts: { 1: [false,false], 2: [false,false] },
         teams: {
           1: createEmptyTeam(teamNames[1]),
           2: createEmptyTeam(teamNames[2])
@@ -386,16 +488,19 @@
       sets: [createEmptySet()],
       selectedTeam: 1,
       selectedPlayer: null,
-      history: [] // {setIndex, teamId, jersey, rating}
+      history: []
     };
 
-    function currentSet() {
-      return appState.sets[appState.currentSetIndex];
-    }
+    function currentSet() { return appState.sets[appState.currentSetIndex]; }
 
-    function sr(score, total) {
-      if (!total) return 0;
-      return score / total;
+    function sr(score, total) { return total ? (score / total) : 0; }
+
+    // SR thresholds -> row color
+    function srClass(psr) {
+      // red: < 1.80 | yellow: 1.80–2.29 | green: >= 2.30
+      if (psr < 1.80) return "sr-low";
+      if (psr < 2.30) return "sr-med";
+      return "sr-high";
     }
 
     // ----- TEAM NAMES -----
@@ -421,10 +526,13 @@
       for (var i = 0; i < appState.sets.length; i++) {
         (function(idx) {
           var btn = document.createElement("button");
-          btn.textContent = "Set " + (idx + 1);
-          if (idx === appState.currentSetIndex) {
-            btn.className = "active-set";
-          }
+          var setObj = appState.sets[idx];
+          var s1 = (setObj.score && setObj.score[1] !== "") ? setObj.score[1] : "";
+          var s2 = (setObj.score && setObj.score[2] !== "") ? setObj.score[2] : "";
+          var scoreSuffix = (s1 !== "" && s2 !== "") ? (" (" + s1 + "-" + s2 + ")") : "";
+          btn.textContent = "Set " + (idx + 1) + scoreSuffix;
+
+          if (idx === appState.currentSetIndex) btn.className = "active-set";
           btn.onclick = function() {
             appState.currentSetIndex = idx;
             appState.selectedPlayer = null;
@@ -449,12 +557,9 @@
       var idx = appState.currentSetIndex;
       appState.sets[idx] = createEmptySet();
 
-      // prune history entries for this set
       var newHist = [];
       for (var i = 0; i < appState.history.length; i++) {
-        if (appState.history[i].setIndex !== idx) {
-          newHist.push(appState.history[i]);
-        }
+        if (appState.history[i].setIndex !== idx) newHist.push(appState.history[i]);
       }
       appState.history = newHist;
       appState.selectedPlayer = null;
@@ -484,40 +589,29 @@
     }
 
     function rosterContains(list, jersey) {
-      for (var i = 0; i < list.length; i++) {
-        if (list[i] === jersey) return true;
-      }
+      for (var i = 0; i < list.length; i++) if (list[i] === jersey) return true;
       return false;
     }
 
-    // numeric keypad jersey flow
     function showJerseyInput() {
       var input = document.getElementById("jersey-input");
       var btn = document.getElementById("jersey-submit");
       input.style.display = "inline-block";
       btn.style.display = "inline-block";
       input.value = "";
-      input.focus(); // number pad on iPad
+      input.focus();
     }
 
     function submitJersey() {
       var input = document.getElementById("jersey-input");
       var num = input.value;
-      if (!num) {
-        setMessage("Enter a jersey number first.");
-        return;
-      }
+      if (!num) { setMessage("Enter a jersey number first."); return; }
 
       var jersey = parseInt(num, 10);
-      if (isNaN(jersey)) {
-        setMessage("Invalid jersey number.");
-        return;
-      }
+      if (isNaN(jersey)) { setMessage("Invalid jersey number."); return; }
 
       var list = rosters[appState.selectedTeam];
-      if (!rosterContains(list, jersey)) {
-        list.push(jersey);
-      }
+      if (!rosterContains(list, jersey)) list.push(jersey);
 
       input.value = "";
       input.style.display = "none";
@@ -537,10 +631,7 @@
     function rate(rating) {
       var teamId = appState.selectedTeam;
       var jersey = appState.selectedPlayer;
-      if (jersey === null) {
-        setMessage("Choose a player first.");
-        return;
-      }
+      if (jersey === null) { setMessage("Choose a player first."); return; }
       if (rating < 0 || rating > 3) return;
       addPassTouch(teamId, jersey, rating);
     }
@@ -551,11 +642,7 @@
       var team = set.teams[teamId];
 
       if (!team.players[jersey]) {
-        team.players[jersey] = {
-          total: 0,
-          score: 0,
-          counts: [0, 0, 0, 0]
-        };
+        team.players[jersey] = { total: 0, score: 0, counts: [0,0,0,0] };
       }
       var p = team.players[jersey];
       p.total += 1;
@@ -564,39 +651,96 @@
       team.totalPasses += 1;
       team.totalScore += rating;
 
-      appState.history.push({
-        setIndex: setIdx,
-        teamId: teamId,
-        jersey: jersey,
-        rating: rating
-      });
+      appState.history.push({ setIndex: setIdx, teamId: teamId, jersey: jersey, rating: rating });
       setMessage("+ " + team.name + ", #" + jersey + ", rating " + rating);
       render();
     }
 
     function undo() {
-      if (appState.history.length === 0) {
-        setMessage("Nothing to undo.");
-        return;
-      }
+      if (appState.history.length === 0) { setMessage("Nothing to undo."); return; }
       var last = appState.history.pop();
       var set = appState.sets[last.setIndex];
       var team = set.teams[last.teamId];
       var p = team.players[last.jersey];
-      if (!p) {
-        setMessage("Undo error.");
-        return;
-      }
+      if (!p) { setMessage("Undo error."); return; }
+
       p.total -= 1;
       p.score -= last.rating;
       p.counts[last.rating] -= 1;
       team.totalPasses -= 1;
       team.totalScore -= last.rating;
-      if (p.total <= 0) {
-        delete team.players[last.jersey];
-      }
+
+      if (p.total <= 0) delete team.players[last.jersey];
       setMessage("Undid: " + team.name + ", #" + last.jersey + ", rating " + last.rating);
       render();
+    }
+
+    // ----- SET SCORE + TIMEOUTS -----
+    function renderSetMeta() {
+      var setIdx = appState.currentSetIndex;
+      var setObj = currentSet();
+
+      document.getElementById("set-meta-title").textContent = "Set " + (setIdx + 1) + " (Score + Timeouts)";
+      document.getElementById("score-t1-label").textContent = teamNames[1];
+      document.getElementById("score-t2-label").textContent = teamNames[2];
+      document.getElementById("to-t1-name").textContent = teamNames[1];
+      document.getElementById("to-t2-name").textContent = teamNames[2];
+
+      document.getElementById("score-t1").value = (setObj.score && setObj.score[1] !== undefined) ? setObj.score[1] : "";
+      document.getElementById("score-t2").value = (setObj.score && setObj.score[2] !== undefined) ? setObj.score[2] : "";
+
+      var t = setObj.timeouts || { 1:[false,false], 2:[false,false] };
+      document.getElementById("to-t1-1").checked = !!t[1][0];
+      document.getElementById("to-t1-2").checked = !!t[1][1];
+      document.getElementById("to-t2-1").checked = !!t[2][0];
+      document.getElementById("to-t2-2").checked = !!t[2][1];
+    }
+
+    function saveSetScore() {
+      var setObj = currentSet();
+      var s1 = document.getElementById("score-t1").value.replace(/^\s+|\s+$/g, "");
+      var s2 = document.getElementById("score-t2").value.replace(/^\s+|\s+$/g, "");
+
+      if (s1 !== "" && isNaN(parseInt(s1, 10))) { setMessage("Team 1 score must be a number."); return; }
+      if (s2 !== "" && isNaN(parseInt(s2, 10))) { setMessage("Team 2 score must be a number."); return; }
+
+      setObj.score[1] = s1;
+      setObj.score[2] = s2;
+
+      setMessage("Saved Set " + (appState.currentSetIndex + 1) + " score.");
+      renderSetButtons();
+      renderMatchSummary();
+    }
+
+    function clearSetScore() {
+      var setObj = currentSet();
+      setObj.score[1] = "";
+      setObj.score[2] = "";
+      document.getElementById("score-t1").value = "";
+      document.getElementById("score-t2").value = "";
+      setMessage("Cleared Set " + (appState.currentSetIndex + 1) + " score.");
+      renderSetButtons();
+      renderMatchSummary();
+    }
+
+    function onTimeoutChange() {
+      var setObj = currentSet();
+      if (!setObj.timeouts) setObj.timeouts = { 1:[false,false], 2:[false,false] };
+
+      setObj.timeouts[1][0] = document.getElementById("to-t1-1").checked;
+      setObj.timeouts[1][1] = document.getElementById("to-t1-2").checked;
+      setObj.timeouts[2][0] = document.getElementById("to-t2-1").checked;
+      setObj.timeouts[2][1] = document.getElementById("to-t2-2").checked;
+
+      setMessage("Timeouts updated for Set " + (appState.currentSetIndex + 1) + ".");
+      renderMatchSummary();
+    }
+
+    function initTimeoutHandlers() {
+      document.getElementById("to-t1-1").addEventListener("change", onTimeoutChange);
+      document.getElementById("to-t1-2").addEventListener("change", onTimeoutChange);
+      document.getElementById("to-t2-1").addEventListener("change", onTimeoutChange);
+      document.getElementById("to-t2-2").addEventListener("change", onTimeoutChange);
     }
 
     // ----- RENDER PLAYERS & TEAMS -----
@@ -604,24 +748,23 @@
       var container = document.getElementById("player-buttons");
       container.innerHTML = "";
       var list = rosters[appState.selectedTeam];
+
       if (!list || list.length === 0) {
         var span = document.createElement("span");
         span.textContent = "No players yet. Tap + Add Player.";
         container.appendChild(span);
         return;
       }
+
       var sorted = list.slice(0);
       sorted.sort(function(a, b) { return a - b; });
+
       for (var i = 0; i < sorted.length; i++) {
         (function(jersey) {
           var btn = document.createElement("button");
           btn.textContent = jersey;
-          if (appState.selectedPlayer === jersey) {
-            btn.className = "active-player";
-          }
-          btn.onclick = function() {
-            selectPlayer(jersey);
-          };
+          if (appState.selectedPlayer === jersey) btn.className = "active-player";
+          btn.onclick = function() { selectPlayer(jersey); };
           container.appendChild(btn);
         })(sorted[i]);
       }
@@ -665,9 +808,7 @@
 
         var jerseys = [];
         for (var key in team.players) {
-          if (team.players.hasOwnProperty(key)) {
-            jerseys.push(parseInt(key, 10));
-          }
+          if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
         }
         jerseys.sort(function(a, b) { return a - b; });
 
@@ -682,11 +823,15 @@
           for (var j = 0; j < jerseys.length; j++) {
             var jersey = jerseys[j];
             var p = team.players[jersey];
+            var psr = sr(p.score, p.total);
+
             var tr = document.createElement("tr");
+            tr.className = srClass(psr); // heat color (row)
+
             tr.innerHTML =
               "<td>" + jersey + "</td>" +
               "<td>" + p.total + "</td>" +
-              "<td>" + sr(p.score, p.total).toFixed(2) + "</td>" +
+              "<td>" + psr.toFixed(2) + "</td>" +
               "<td>" + p.counts[0] + "</td>" +
               "<td>" + p.counts[1] + "</td>" +
               "<td>" + p.counts[2] + "</td>" +
@@ -711,10 +856,7 @@
       }
       box.style.display = "block";
 
-      var totals = {
-        1: { passes: 0, score: 0 },
-        2: { passes: 0, score: 0 }
-      };
+      var totals = { 1: { passes: 0, score: 0 }, 2: { passes: 0, score: 0 } };
       var playersAgg = { 1: {}, 2: {} };
 
       for (var s = 0; s < appState.sets.length; s++) {
@@ -724,14 +866,11 @@
           totals[t].passes += team.totalPasses;
           totals[t].score  += team.totalScore;
 
-          var teamPlayers = team.players;
-          for (var key in teamPlayers) {
-            if (teamPlayers.hasOwnProperty(key)) {
+          for (var key in team.players) {
+            if (team.players.hasOwnProperty(key)) {
               var jersey = key;
-              var p = teamPlayers[key];
-              if (!playersAgg[t][jersey]) {
-                playersAgg[t][jersey] = { passes: 0, score: 0 };
-              }
+              var p = team.players[key];
+              if (!playersAgg[t][jersey]) playersAgg[t][jersey] = { passes: 0, score: 0 };
               playersAgg[t][jersey].passes += p.total;
               playersAgg[t][jersey].score  += p.score;
             }
@@ -742,37 +881,39 @@
       var sr1 = sr(totals[1].score, totals[1].passes).toFixed(2);
       var sr2 = sr(totals[2].score, totals[2].passes).toFixed(2);
 
-      var html = "<strong>Match Totals (All Sets)</strong><br>";
-      html += teamNames[1] + ": Passes " + totals[1].passes +
-              " | Total " + totals[1].score +
-              " | SR " + sr1 + "<br>";
-      html += teamNames[2] + ": Passes " + totals[2].passes +
-              " | Total " + totals[2].score +
-              " | SR " + sr2 + "<br><br>";
+      var setLines = "";
+      for (var i = 0; i < appState.sets.length; i++) {
+        var st = appState.sets[i];
+        var a = (st.score && st.score[1] !== "") ? st.score[1] : "-";
+        var b = (st.score && st.score[2] !== "") ? st.score[2] : "-";
+        var t1to = st.timeouts ? ((st.timeouts[1][0]?1:0) + (st.timeouts[1][1]?1:0)) : 0;
+        var t2to = st.timeouts ? ((st.timeouts[2][0]?1:0) + (st.timeouts[2][1]?1:0)) : 0;
+        setLines += "Set " + (i+1) + ": " + a + "-" + b + " | TO " + teamNames[1] + ": " + t1to + "/2, " + teamNames[2] + ": " + t2to + "/2<br>";
+      }
 
+      var html = "<strong>Match Totals (All Sets)</strong><br>";
+      html += teamNames[1] + ": Passes " + totals[1].passes + " | Total " + totals[1].score + " | SR " + sr1 + "<br>";
+      html += teamNames[2] + ": Passes " + totals[2].passes + " | Total " + totals[2].score + " | SR " + sr2 + "<br><br>";
+
+      html += "<strong>Set Scores + Timeouts</strong><br>" + setLines + "<br>";
       html += "<strong>Players (All Sets)</strong><br>";
 
       for (var t = 1; t <= 2; t++) {
         html += "<em>" + teamNames[t] + "</em>";
         html += "<table>";
         html += "<tr><th>#</th><th>Passes</th><th>SR</th></tr>";
+
         var jerseys = [];
-        for (var key in playersAgg[t]) {
-          if (playersAgg[t].hasOwnProperty(key)) {
-            jerseys.push(parseInt(key, 10));
-          }
-        }
+        for (var key in playersAgg[t]) if (playersAgg[t].hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
         jerseys.sort(function(a, b) { return a - b; });
+
         if (jerseys.length === 0) {
           html += "<tr><td colspan='3'>No passes yet</td></tr>";
         } else {
           for (var j = 0; j < jerseys.length; j++) {
             var jersey = jerseys[j];
             var pl = playersAgg[t][jersey];
-            html += "<tr><td>" + jersey + "</td><td>" +
-                    pl.passes + "</td><td>" +
-                    sr(pl.score, pl.passes).toFixed(2) +
-                    "</td></tr>";
+            html += "<tr><td>" + jersey + "</td><td>" + pl.passes + "</td><td>" + sr(pl.score, pl.passes).toFixed(2) + "</td></tr>";
           }
         }
         html += "</table>";
@@ -784,13 +925,11 @@
     function toggleMatchStats() {
       matchStatsVisible = !matchStatsVisible;
       var msBtn = document.getElementById("match-stats-btn");
-      if (msBtn) {
-        msBtn.textContent = matchStatsVisible ? "Hide Match Stats" : "Show Match Stats";
-      }
+      if (msBtn) msBtn.textContent = matchStatsVisible ? "Hide Match Stats" : "Show Match Stats";
       renderMatchSummary();
     }
 
-    // ----- COLORS -----
+    // ----- COLORS + AUTO TEXT COLOR -----
     function openColorPicker(teamId) {
       colorPickerTeam = teamId;
       document.getElementById("color-team-label").textContent = teamNames[teamId];
@@ -802,25 +941,53 @@
       document.getElementById("color-picker").classList.remove("show");
     }
 
+    function hexToRgb(hex) {
+      var h = (hex || "").replace("#", "");
+      if (h.length === 3) h = h[0]+h[0] + h[1]+h[1] + h[2]+h[2];
+      if (h.length !== 6) return {r:0,g:0,b:0};
+      return { r: parseInt(h.substring(0,2),16), g: parseInt(h.substring(2,4),16), b: parseInt(h.substring(4,6),16) };
+    }
+
+    function bestTextColor(bgHex) {
+      var rgb = hexToRgb(bgHex);
+      var lum = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+      return (lum > 0.65) ? "#000000" : "#FFFFFF";
+    }
+
     function initColorPicker() {
-      var overlay = document.getElementById("color-picker");
-      var swatches = overlay.querySelectorAll(".color-swatch-btn");
-      for (var i = 0; i < swatches.length; i++) {
-        swatches[i].onclick = function() {
-          if (colorPickerTeam === null) return;
-          var col = this.getAttribute("data-color");
-          teamColors[colorPickerTeam] = col;
-          render();
-          closeColorPicker();
-        };
+      var swatchWrap = document.getElementById("color-swatches");
+      swatchWrap.innerHTML = "";
+
+      for (var i = 0; i < COLOR_PALETTE.length; i++) {
+        (function(color) {
+          var btn = document.createElement("button");
+          btn.className = "color-swatch-btn";
+          btn.setAttribute("data-color", color);
+          btn.style.backgroundColor = color;
+          if (color.toUpperCase() === "#FFFFFF") btn.style.border = "2px solid #333";
+          btn.onclick = function() {
+            if (colorPickerTeam === null) return;
+            teamColors[colorPickerTeam] = color;
+            render();
+            closeColorPicker();
+          };
+          swatchWrap.appendChild(btn);
+        })(COLOR_PALETTE[i]);
       }
     }
 
     function applyTeamColors() {
       var btn1 = document.getElementById("btn-team1");
       var btn2 = document.getElementById("btn-team2");
-      if (btn1) btn1.style.backgroundColor = teamColors[1];
-      if (btn2) btn2.style.backgroundColor = teamColors[2];
+
+      if (btn1) {
+        btn1.style.backgroundColor = teamColors[1];
+        btn1.style.color = bestTextColor(teamColors[1]);
+      }
+      if (btn2) {
+        btn2.style.backgroundColor = teamColors[2];
+        btn2.style.color = bestTextColor(teamColors[2]);
+      }
     }
 
     // ----- RENDER ROOT -----
@@ -841,28 +1008,29 @@
       renderPlayerButtons();
       renderTeams();
       renderMatchSummary();
+      renderSetMeta();
     }
 
-    function setMessage(msg) {
-      document.getElementById("message").textContent = msg;
-    }
+    function setMessage(msg) { document.getElementById("message").textContent = msg; }
 
     // ----- CSV EXPORT -----
     function downloadCSV() {
       var rows = [];
-      rows.push(["Set", "Team", "Jersey", "Passes", "Score", "SR", "Count0", "Count1", "Count2", "Count3"]);
+      rows.push(["Set","Team","Jersey","Passes","Score","SR","Count0","Count1","Count2","Count3","SetScoreT1","SetScoreT2","T1_TO_Used","T2_TO_Used"]);
 
       for (var s = 0; s < appState.sets.length; s++) {
         var set = appState.sets[s];
+        var setScore1 = (set.score && set.score[1] !== "") ? set.score[1] : "";
+        var setScore2 = (set.score && set.score[2] !== "") ? set.score[2] : "";
+        var t1to = set.timeouts ? ((set.timeouts[1][0]?1:0) + (set.timeouts[1][1]?1:0)) : 0;
+        var t2to = set.timeouts ? ((set.timeouts[2][0]?1:0) + (set.timeouts[2][1]?1:0)) : 0;
+
         for (var teamId = 1; teamId <= 2; teamId++) {
           var team = set.teams[teamId];
           var jerseys = [];
-          for (var key in team.players) {
-            if (team.players.hasOwnProperty(key)) {
-              jerseys.push(parseInt(key, 10));
-            }
-          }
+          for (var key in team.players) if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
           jerseys.sort(function(a, b) { return a - b; });
+
           for (var j = 0; j < jerseys.length; j++) {
             var jersey = jerseys[j];
             var p = team.players[jersey];
@@ -876,16 +1044,18 @@
               p.counts[0],
               p.counts[1],
               p.counts[2],
-              p.counts[3]
+              p.counts[3],
+              setScore1,
+              setScore2,
+              t1to,
+              t2to
             ]);
           }
         }
       }
 
       var csvContent = "";
-      for (var r = 0; r < rows.length; r++) {
-        csvContent += rows[r].join(",") + "\n";
-      }
+      for (var r = 0; r < rows.length; r++) csvContent += rows[r].join(",") + "\n";
 
       var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       var url = URL.createObjectURL(blob);
@@ -905,7 +1075,9 @@
     document.getElementById("team1-name").value = teamNames[1];
     document.getElementById("team2-name").value = teamNames[2];
     initColorPicker();
+    initTimeoutHandlers();
     render();
   </script>
 </body>
 </html>
+
