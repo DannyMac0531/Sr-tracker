@@ -5,283 +5,124 @@
   <title>Volleyball SR Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 10px;
-      background: #f5f5f5;
-    }
-    h1 {
-      font-size: 1.4rem;
-      margin-bottom: 6px;
-    }
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-      align-items: center;
-    }
+    body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
+    h1 { font-size: 1.4rem; margin-bottom: 6px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; align-items: center; }
     label { font-size: 0.9rem; }
     input { padding: 6px 8px; font-size: 0.9rem; }
     button { cursor: pointer; font-size: 0.95rem; }
 
-    .set-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin: 10px 0;
-    }
+    .set-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
     #set-buttons button {
-      padding: 8px 12px;
-      margin: 2px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      background: #e0e0e0;
+      padding: 8px 12px; margin: 2px; border-radius: 6px;
+      border: 1px solid #444; background: #e0e0e0;
     }
-    #set-buttons button.active-set {
-      background: #4285f4;
-      color: white;
-    }
+    #set-buttons button.active-set { background: #4285f4; color: white; }
 
     /* Set meta (score + timeouts) */
     .set-meta {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 10px;
+      background: #ffffff; border-radius: 8px; padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 10px;
     }
-    .set-meta h3 {
-      margin: 0 0 8px 0;
-      font-size: 1rem;
-    }
-    .set-meta-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-start;
-    }
+    .set-meta h3 { margin: 0 0 8px 0; font-size: 1rem; }
+    .set-meta-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
     .set-meta-card {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px;
-      min-width: 260px;
-      flex: 1 1 260px;
+      background: #fafafa; border: 1px solid #ddd; border-radius: 8px;
+      padding: 10px; min-width: 260px; flex: 1 1 260px;
     }
-    .score-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .score-row input {
-      width: 80px;
-      font-size: 1.05rem;
-    }
-    .muted {
-      color: #666;
-      font-size: 0.85rem;
-      margin-top: 6px;
-    }
-    .to-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .to-group {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .to-group input[type="checkbox"]{
-      transform: scale(1.5);
-      margin-right: 4px;
-    }
+    .score-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .score-row input { width: 80px; font-size: 1.05rem; }
+    .muted { color: #666; font-size: 0.85rem; margin-top: 6px; }
+
+    .to-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .to-group { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .to-group input[type="checkbox"]{ transform: scale(1.5); margin-right: 4px; }
     .to-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background: #fff;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 8px; border-radius: 8px;
+      border: 1px solid #ccc; background: #fff;
     }
 
-    .controls-touch {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 15px;
-    }
+    .controls-touch { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
     .controls-touch section {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 8px;
+      background: #ffffff; border-radius: 8px; padding: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .controls-touch h3 {
-      margin: 0 0 6px 0;
-      font-size: 1rem;
-    }
+    .controls-touch h3 { margin: 0 0 6px 0; font-size: 1rem; }
 
     .team-btn,
     .rating-buttons button,
     #player-buttons button,
     .danger-btn,
     .utility-btn {
-      padding: 14px 18px;
-      margin: 4px;
-      font-size: 1.1rem;
-      border-radius: 10px;
-      border: 2px solid #333;
-      background: #e0e0e0;
+      padding: 14px 18px; margin: 4px; font-size: 1.1rem;
+      border-radius: 10px; border: 2px solid #333; background: #e0e0e0;
     }
 
-    .team-btn {
-      width: 130px;
-      font-weight: bold;
-    }
-    .team-btn.active {
-      box-shadow: 0 0 0 2px rgba(0,0,0,0.3);
-    }
+    .team-btn { width: 130px; font-weight: bold; }
+    .team-btn.active { box-shadow: 0 0 0 2px rgba(0,0,0,0.3); }
 
-    .rating-buttons button {
-      width: 60px;
-      font-weight: bold;
-      background: #f2f2f2;
-    }
+    .rating-buttons button { width: 60px; font-weight: bold; background: #f2f2f2; }
 
-    #player-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    #player-buttons button {
-      background: #f0f0f0;
-      width: 70px;
-    }
-    #player-buttons button.active-player {
-      background: #7bc96f;
-      color: white;
-    }
+    #player-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+    #player-buttons button { background: #f0f0f0; width: 70px; }
+    #player-buttons button.active-player { background: #7bc96f; color: white; }
 
-    .danger-btn {
-      background: #d9534f;
-      color: white;
-      border-color: #b52b27;
-    }
-    .utility-btn {
-      background: #0275d8;
-      color: white;
-      border-color: #01549b;
-    }
+    .danger-btn { background: #d9534f; color: white; border-color: #b52b27; }
+    .utility-btn { background: #0275d8; color: white; border-color: #01549b; }
 
-    .teams {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
+    .teams { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
     .team-box {
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 8px;
-      flex: 1 1 260px;
-      min-width: 260px;
-      background: white;
+      border: 1px solid #333; border-radius: 8px; padding: 8px;
+      flex: 1 1 260px; min-width: 260px; background: white;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    .team-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-    .team-header h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-    .team-summary {
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 3px;
-      text-align: center;
-    }
+    .team-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .team-header h2 { margin: 0; font-size: 1.1rem; }
+    .team-summary { font-size: 0.9rem; margin-bottom: 4px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { border-bottom: 1px solid #ddd; padding: 3px; text-align: center; }
     th { background: #eee; }
 
-    #message {
-      font-size: 0.9rem;
-      min-height: 1.2em;
-      margin-bottom: 4px;
-    }
+    #message { font-size: 0.9rem; min-height: 1.2em; margin-bottom: 4px; }
 
     /* Match stats box */
     .match-summary-box {
-      display: none;
-      margin-top: 10px;
-      padding: 8px;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: none; margin-top: 10px; padding: 8px; background: #ffffff;
+      border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       font-size: 0.9rem;
     }
     .match-summary-box table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      margin-top: 4px;
-      margin-bottom: 6px;
+      width: 100%; border-collapse: collapse; font-size: 0.8rem;
+      margin-top: 4px; margin-bottom: 6px;
     }
-    .match-summary-box th,
-    .match-summary-box td {
-      border-bottom: 1px solid #ccc;
-      padding: 3px;
-      text-align: center;
+    .match-summary-box th, .match-summary-box td {
+      border-bottom: 1px solid #ccc; padding: 3px; text-align: center;
     }
 
     /* Color picker overlay */
     .color-picker-overlay {
-      position: fixed;
-      left: 0; right: 0; top: 0; bottom: 0;
+      position: fixed; left: 0; right: 0; top: 0; bottom: 0;
       background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
+      display: none; align-items: center; justify-content: center;
       z-index: 1000;
     }
     .color-picker-overlay.show { display: flex; }
     .color-picker-inner {
-      background: #ffffff;
-      padding: 12px;
-      border-radius: 10px;
-      max-width: 360px;
-      font-size: 0.9rem;
-      text-align: center;
+      background: #ffffff; padding: 12px; border-radius: 10px;
+      max-width: 360px; font-size: 0.9rem; text-align: center;
     }
     .color-swatches {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr); /* 10 colors x (light,dark) fits nicely */
       gap: 8px;
       margin: 10px 0;
       justify-content: center;
     }
     .color-swatch-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 18px;
-      border: 2px solid #333;
-      cursor: pointer;
+      width: 36px; height: 36px; border-radius: 18px;
+      border: 2px solid #333; cursor: pointer;
     }
 
     /* SR heat colors (low/medium/high) */
@@ -290,18 +131,9 @@
     .sr-high { background: #d7f7d7; }  /* light green */
 
     @media (min-width: 768px) {
-      .controls-touch {
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-      #player-buttons button {
-        width: 80px;
-        font-size: 1.2rem;
-      }
-      .rating-buttons button {
-        width: 70px;
-        font-size: 1.2rem;
-      }
+      .controls-touch { flex-direction: row; flex-wrap: wrap; }
+      #player-buttons button { width: 80px; font-size: 1.2rem; }
+      .rating-buttons button { width: 70px; font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -453,19 +285,33 @@
     var teamNames = { 1: "Team 1", 2: "Team 2" };
     var rosters = { 1: [], 2: [] };
 
-    var teamColors = { 1: "#7bc96f", 2: "#4285f4" };
+    var teamColors = { 1: "#BBDEFB", 2: "#C8E6C9" }; // default: light blue + light green
     var matchStatsVisible = false;
     var colorPickerTeam = null;
 
-    // Pastel rainbow + some darker options
+    // FINAL CHANGE: ONLY these colors, each with Light + Dark option
+    // Order: Blue, Green, White, Black, Gray, Red, Yellow, Orange, Purple, Brown
     var COLOR_PALETTE = [
-      "#FFCDD2", "#F8BBD0", "#E1BEE7", "#D1C4E9", "#C5CAE9", "#BBDEFB",
-      "#B3E5FC", "#B2EBF2", "#B2DFDB", "#C8E6C9", "#DCEDC8", "#F0F4C3",
-      "#FFF9C4", "#FFECB3", "#FFE0B2", "#FFCCBC", "#D7CCC8", "#CFD8DC",
-      "#FFEBEE", "#FCE4EC", "#F3E5F5", "#EDE7F6", "#E8EAF6", "#E3F2FD",
-      "#E1F5FE", "#E0F7FA", "#E0F2F1", "#E8F5E9", "#F1F8E9", "#F9FBE7",
-      "#FFFDE7", "#FFF8E1", "#FFF3E0", "#FBE9E7", "#FAFAFA", "#ECEFF1",
-      "#1E88E5", "#43A047", "#8E24AA", "#F4511E", "#6D4C41", "#263238"
+      // Blue
+      "#BBDEFB", "#1E88E5",
+      // Green
+      "#C8E6C9", "#43A047",
+      // White
+      "#FFFFFF", "#E0E0E0",
+      // Black
+      "#424242", "#000000",
+      // Gray
+      "#BDBDBD", "#616161",
+      // Red
+      "#FFCDD2", "#E53935",
+      // Yellow
+      "#FFF9C4", "#F9A825",
+      // Orange
+      "#FFE0B2", "#F4511E",
+      // Purple
+      "#E1BEE7", "#8E24AA",
+      // Brown
+      "#D7CCC8", "#6D4C41"
     ];
 
     function createEmptyTeam(name) {
@@ -492,7 +338,6 @@
     };
 
     function currentSet() { return appState.sets[appState.currentSetIndex]; }
-
     function sr(score, total) { return total ? (score / total) : 0; }
 
     // SR thresholds -> row color
@@ -527,9 +372,11 @@
         (function(idx) {
           var btn = document.createElement("button");
           var setObj = appState.sets[idx];
+
           var s1 = (setObj.score && setObj.score[1] !== "") ? setObj.score[1] : "";
           var s2 = (setObj.score && setObj.score[2] !== "") ? setObj.score[2] : "";
           var scoreSuffix = (s1 !== "" && s2 !== "") ? (" (" + s1 + "-" + s2 + ")") : "";
+
           btn.textContent = "Set " + (idx + 1) + scoreSuffix;
 
           if (idx === appState.currentSetIndex) btn.className = "active-set";
@@ -641,9 +488,8 @@
       var set = currentSet();
       var team = set.teams[teamId];
 
-      if (!team.players[jersey]) {
-        team.players[jersey] = { total: 0, score: 0, counts: [0,0,0,0] };
-      }
+      if (!team.players[jersey]) team.players[jersey] = { total: 0, score: 0, counts: [0,0,0,0] };
+
       var p = team.players[jersey];
       p.total += 1;
       p.score += rating;
@@ -807,9 +653,7 @@
         var tbody = document.createElement("tbody");
 
         var jerseys = [];
-        for (var key in team.players) {
-          if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
-        }
+        for (var key in team.players) if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
         jerseys.sort(function(a, b) { return a - b; });
 
         if (jerseys.length === 0) {
@@ -826,7 +670,7 @@
             var psr = sr(p.score, p.total);
 
             var tr = document.createElement("tr");
-            tr.className = srClass(psr); // heat color (row)
+            tr.className = srClass(psr);
 
             tr.innerHTML =
               "<td>" + jersey + "</td>" +
@@ -894,7 +738,6 @@
       var html = "<strong>Match Totals (All Sets)</strong><br>";
       html += teamNames[1] + ": Passes " + totals[1].passes + " | Total " + totals[1].score + " | SR " + sr1 + "<br>";
       html += teamNames[2] + ": Passes " + totals[2].passes + " | Total " + totals[2].score + " | SR " + sr2 + "<br><br>";
-
       html += "<strong>Set Scores + Timeouts</strong><br>" + setLines + "<br>";
       html += "<strong>Players (All Sets)</strong><br>";
 
@@ -964,13 +807,20 @@
           btn.className = "color-swatch-btn";
           btn.setAttribute("data-color", color);
           btn.style.backgroundColor = color;
-          if (color.toUpperCase() === "#FFFFFF") btn.style.border = "2px solid #333";
+
+          // Outline for very light swatches
+          var upper = color.toUpperCase();
+          if (upper === "#FFFFFF" || upper === "#E0E0E0" || upper === "#BDBDBD") {
+            btn.style.border = "2px solid #333";
+          }
+
           btn.onclick = function() {
             if (colorPickerTeam === null) return;
             teamColors[colorPickerTeam] = color;
             render();
             closeColorPicker();
           };
+
           swatchWrap.appendChild(btn);
         })(COLOR_PALETTE[i]);
       }
