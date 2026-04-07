@@ -204,6 +204,7 @@
       padding: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.12);
       border: 2px solid #333;
+      min-height: 170px;
     }
 
     .pass-entry-box h3 {
@@ -226,21 +227,22 @@
       font-size: 1.15rem;
     }
 
-    .passer-btn.active-player {
-      box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
-    }
-
     .inline-rating-wrap {
       width: 100%;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .inline-rating-label {
       font-size: 0.95rem;
       font-weight: bold;
-      margin-bottom: 6px;
+    }
+
+    .inline-rating-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .inline-rating-buttons button {
@@ -719,18 +721,9 @@
     }
 
     function openRatingPrompt(teamId, jersey) {
-      if (
-        appState.ratingPrompt &&
-        appState.ratingPrompt.teamId === teamId &&
-        appState.ratingPrompt.jersey === jersey
-      ) {
-        appState.ratingPrompt = null;
-        setMessage("Rating options closed.");
-      } else {
-        appState.ratingPrompt = { teamId: teamId, jersey: jersey };
-        setMessage("Rate " + teamNames[teamId] + " player #" + jersey);
-      }
+      appState.ratingPrompt = { teamId: teamId, jersey: jersey };
       render();
+      setMessage("Rate " + teamNames[teamId] + " player #" + jersey);
     }
 
     function rate(teamId, jersey, rating) {
@@ -797,6 +790,7 @@
         delete team.players[last.jersey];
       }
 
+      appState.ratingPrompt = null;
       render();
       setMessage("Undid: " + team.name + ", #" + last.jersey + ", rating " + last.rating);
     }
@@ -882,46 +876,24 @@
         title.textContent = teamNames[teamId] + " Passers:";
         box.appendChild(title);
 
-        var grid = document.createElement("div");
-        grid.className = "passer-grid";
+        var content = document.createElement("div");
+        content.className = "passer-grid";
 
         var list = rosters[teamId].slice(0);
         list.sort(function(a, b) { return a - b; });
 
-        if (list.length === 0) {
-          var empty = document.createElement("div");
-          empty.textContent = "No players yet. Add a jersey below.";
-          grid.appendChild(empty);
-        } else {
-          for (var i = 0; i < list.length; i++) {
-            (function(jersey) {
-              var btn = document.createElement("button");
-              btn.className = "passer-btn";
-              btn.textContent = jersey;
-              btn.style.borderColor = teamColors[teamId];
-              btn.style.backgroundColor = teamColors[teamId];
-              btn.style.color = getContrastText(teamColors[teamId]);
+        var promptOpen =
+          appState.ratingPrompt &&
+          appState.ratingPrompt.teamId === teamId;
 
-              if (
-                appState.ratingPrompt &&
-                appState.ratingPrompt.teamId === teamId &&
-                appState.ratingPrompt.jersey === jersey
-              ) {
-                btn.className += " active-player";
-              }
-
-              btn.onclick = function() {
-                openRatingPrompt(teamId, jersey);
-              };
-
-              grid.appendChild(btn);
-            })(list[i]);
-          }
-        }
-
-        if (appState.ratingPrompt && appState.ratingPrompt.teamId === teamId) {
+        if (promptOpen) {
           var promptWrap = document.createElement("div");
           promptWrap.className = "inline-rating-wrap";
+
+          var selectedLabel = document.createElement("div");
+          selectedLabel.className = "inline-rating-label";
+          selectedLabel.textContent = "Player #" + appState.ratingPrompt.jersey;
+          promptWrap.appendChild(selectedLabel);
 
           var label = document.createElement("div");
           label.className = "inline-rating-label";
@@ -951,10 +923,33 @@
           buttons.appendChild(cancelBtn);
 
           promptWrap.appendChild(buttons);
-          grid.appendChild(promptWrap);
+          content.appendChild(promptWrap);
+        } else {
+          if (list.length === 0) {
+            var empty = document.createElement("div");
+            empty.textContent = "No players yet. Add a jersey below.";
+            content.appendChild(empty);
+          } else {
+            for (var i = 0; i < list.length; i++) {
+              (function(jersey) {
+                var btn = document.createElement("button");
+                btn.className = "passer-btn";
+                btn.textContent = jersey;
+                btn.style.borderColor = teamColors[teamId];
+                btn.style.backgroundColor = teamColors[teamId];
+                btn.style.color = getContrastText(teamColors[teamId]);
+
+                btn.onclick = function() {
+                  openRatingPrompt(teamId, jersey);
+                };
+
+                content.appendChild(btn);
+              })(list[i]);
+            }
+          }
         }
 
-        box.appendChild(grid);
+        box.appendChild(content);
         container.appendChild(box);
       }
     }
