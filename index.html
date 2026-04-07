@@ -523,7 +523,6 @@
   <script>
     var teamNames = { 1: "Team 1", 2: "Team 2" };
     var rosters = { 1: [], 2: [] };
-
     var teamColors = { 1: "#BBDEFB", 2: "#C8E6C9" };
     var matchStatsVisible = false;
     var colorPickerTeam = null;
@@ -867,7 +866,7 @@
       var container = document.getElementById("pass-entry-panels");
       container.innerHTML = "";
 
-      for (var teamId = 1; teamId <= 2; teamId++) {
+      for (let teamId = 1; teamId <= 2; teamId++) {
         var box = document.createElement("div");
         box.className = "pass-entry-box";
         box.style.borderColor = teamColors[teamId];
@@ -903,15 +902,13 @@
           var buttons = document.createElement("div");
           buttons.className = "inline-rating-buttons";
 
-          for (var rating = 0; rating <= 3; rating++) {
-            (function(r) {
-              var rateBtn = document.createElement("button");
-              rateBtn.textContent = r;
-              rateBtn.onclick = function() {
-                rate(teamId, appState.ratingPrompt.jersey, r);
-              };
-              buttons.appendChild(rateBtn);
-            })(rating);
+          for (let rating = 0; rating <= 3; rating++) {
+            var rateBtn = document.createElement("button");
+            rateBtn.textContent = rating;
+            rateBtn.onclick = function() {
+              rate(teamId, appState.ratingPrompt.jersey, rating);
+            };
+            buttons.appendChild(rateBtn);
           }
 
           var cancelBtn = document.createElement("button");
@@ -930,21 +927,21 @@
             empty.textContent = "No players yet. Add a jersey below.";
             content.appendChild(empty);
           } else {
-            for (var i = 0; i < list.length; i++) {
-              (function(jersey) {
-                var btn = document.createElement("button");
-                btn.className = "passer-btn";
-                btn.textContent = jersey;
-                btn.style.borderColor = teamColors[teamId];
-                btn.style.backgroundColor = teamColors[teamId];
-                btn.style.color = getContrastText(teamColors[teamId]);
+            for (let i = 0; i < list.length; i++) {
+              let jersey = list[i];
 
-                btn.onclick = function() {
-                  openRatingPrompt(teamId, jersey);
-                };
+              var btn = document.createElement("button");
+              btn.className = "passer-btn";
+              btn.textContent = jersey;
+              btn.style.borderColor = teamColors[teamId];
+              btn.style.backgroundColor = teamColors[teamId];
+              btn.style.color = getContrastText(teamColors[teamId]);
 
-                content.appendChild(btn);
-              })(list[i]);
+              btn.onclick = function() {
+                openRatingPrompt(teamId, jersey);
+              };
+
+              content.appendChild(btn);
             }
           }
         }
