@@ -5,518 +5,537 @@
   <title>Volleyball Serve Receive Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #eef2f6;
+      --card: #ffffff;
+      --line: #d7dde5;
+      --text: #111827;
+      --muted: #6b7280;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --red: #dc2626;
+      --red-dark: #b91c1c;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
+      margin: 0;
+      padding: 14px;
       font-family: Arial, sans-serif;
-      margin: 10px;
-      background: #f5f5f5;
-      color: #111;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     h1 {
-      font-size: 1.4rem;
-      margin-bottom: 8px;
+      margin: 0 0 12px 0;
+      text-align: center;
+      font-size: 1.7rem;
     }
 
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
-
-    label {
+    .message {
+      min-height: 1.2em;
+      margin: 8px 0 14px;
       font-size: 0.95rem;
+      font-weight: bold;
+      text-align: center;
     }
 
-    input {
-      padding: 8px 10px;
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .banner-grid,
+    .mini-grid,
+    .pass-grid,
+    .stats-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .banner-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .mini-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .pass-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+    .section-title {
       font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #bbb;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.88rem;
     }
 
     button {
       cursor: pointer;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 10px 14px;
       font-size: 1rem;
+      font-weight: bold;
+      background: #f3f4f6;
+      color: #111827;
     }
 
-    .utility-btn,
-    .danger-btn,
-    .team-add-btn,
-    .passer-btn,
-    .inline-rating-buttons button,
-    #set-buttons button {
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 2px solid #333;
-      margin: 4px;
-    }
+    button:hover { filter: brightness(0.98); }
 
     .utility-btn {
-      background: #0275d8;
-      color: white;
-      border-color: #01549b;
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue-dark);
     }
 
     .danger-btn {
-      background: #d9534f;
-      color: white;
-      border-color: #b52b27;
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red-dark);
     }
 
-    .team-add-btn {
-      color: #111;
-      font-weight: bold;
-      background: #e0e0e0;
-    }
-
-    .set-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin: 10px 0;
-    }
-
-    #set-buttons button {
-      background: #e0e0e0;
-      border-width: 1px;
-    }
-
-    #set-buttons button.active-set {
-      background: #4285f4;
-      color: white;
-    }
-
-    #message {
-      font-size: 0.95rem;
-      min-height: 1.2em;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    .set-meta {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      margin-bottom: 12px;
-    }
-
-    .set-meta h3 {
-      margin: 0 0 8px 0;
-      font-size: 1rem;
-    }
-
-    .set-meta-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .set-meta-card {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      min-width: 260px;
-      flex: 1 1 260px;
-    }
-
-    .score-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .score-row input {
-      width: 80px;
-      font-size: 1.05rem;
-    }
-
-    .muted {
-      color: #666;
-      font-size: 0.85rem;
-      margin-top: 6px;
-    }
-
-    .to-row {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .to-group {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .to-group input[type="checkbox"] {
-      transform: scale(1.35);
-      margin-right: 4px;
-    }
-
-    .to-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+    .ghost-btn {
       background: #fff;
     }
 
-    .controls-touch {
+    .tiny-btn {
+      min-width: 44px;
+      padding: 8px 10px;
+      font-size: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #c7ced8;
+      font-size: 1rem;
+      background: #fff;
+    }
+
+    .setup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 15px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
     }
 
-    .controls-touch section {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    .setup-overlay.hidden,
+    .color-picker-overlay.hidden {
+      display: none;
     }
 
-    .controls-touch h3 {
-      margin: 0 0 8px 0;
-      font-size: 1rem;
+    .setup-modal,
+    .color-picker-inner {
+      width: min(720px, 100%);
+      background: #fff;
+      border-radius: 22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+      padding: 18px;
     }
 
-    .pass-entry-grid {
+    .setup-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .setup-team {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .setup-team h3 {
+      margin: 0 0 10px;
+    }
+
+    .setup-actions {
+      display: flex;
+      justify-content: flex-end;
       gap: 10px;
-      margin-top: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
     }
 
-    .pass-entry-box {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      border: 2px solid #333;
-      min-height: 170px;
+    .swatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
     }
 
-    .pass-entry-box h3 {
-      margin: 0 0 8px 0;
+    .swatch {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 2px solid #374151;
+    }
+
+    .swatch.active {
+      outline: 3px solid #111827;
+      outline-offset: 2px;
+    }
+
+    .set-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .set-buttons button.active-set {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue-dark);
+    }
+
+    .actions-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .counter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .counter-team {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .counter-team h4 {
+      margin: 0 0 10px;
       font-size: 1rem;
+    }
+
+    .count-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .count-value {
+      min-width: 44px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .timeout-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .timeout-group {
+      flex: 1 1 180px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .timeout-checks {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .timeout-checks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+    }
+
+    .timeout-checks input[type="checkbox"] {
+      width: auto;
+      transform: scale(1.2);
+      margin: 0;
+    }
+
+    .pass-box {
+      border: 2px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 12px;
+      min-height: 230px;
+      background: #fff;
+    }
+
+    .pass-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     .passer-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      min-height: 92px;
       align-items: flex-start;
     }
 
-    .passer-btn {
-      min-width: 72px;
-      min-height: 52px;
-      background: #f0f0f0;
-      font-weight: bold;
+    .passer-btn,
+    .rating-btn {
+      min-width: 68px;
+      min-height: 54px;
       font-size: 1.15rem;
+      border-width: 2px;
     }
 
-    .inline-rating-wrap {
-      width: 100%;
+    .plus-tile {
+      min-width: 68px;
+      min-height: 54px;
+      font-size: 1.3rem;
+      background: #fff;
+      border-style: dashed;
+    }
+
+    .rating-panel {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
-
-    .inline-rating-label {
-      font-size: 0.95rem;
-      font-weight: bold;
-    }
-
-    .inline-rating-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .inline-rating-buttons button {
-      min-width: 58px;
-      font-weight: bold;
-      background: #f2f2f2;
-      font-size: 1.1rem;
-    }
-
-    .team-add-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-top: 6px;
-    }
-
-    .teams {
-      display: flex;
-      flex-wrap: wrap;
       gap: 10px;
-      margin-top: 8px;
     }
 
-    .team-box {
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 8px;
-      flex: 1 1 280px;
-      min-width: 280px;
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-
-    .team-header {
+    .rating-row {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
-    .team-header h2 {
-      margin: 0;
-      font-size: 1.1rem;
+    .inline-add {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
     }
 
-    .team-summary {
-      font-size: 0.95rem;
-      margin: 6px 0;
+    .inline-add-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .inline-add-row input {
+      flex: 1 1 120px;
+      max-width: 120px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
     }
 
     th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 4px;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 6px 4px;
       text-align: center;
     }
 
     th {
-      background: #eee;
+      background: #f3f4f6;
+    }
+
+    .team-box {
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .team-box-head {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+
+    .team-box-body {
+      padding: 12px;
+      background: #fff;
     }
 
     .match-summary-box {
       display: none;
-      margin-top: 10px;
-      padding: 10px;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      font-size: 0.92rem;
+      margin-top: 14px;
     }
 
-    .match-summary-box table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-      margin-top: 6px;
-      margin-bottom: 10px;
-    }
-
-    .match-summary-box th,
-    .match-summary-box td {
-      border-bottom: 1px solid #ccc;
-      padding: 4px;
-      text-align: center;
+    .match-summary-box.show {
+      display: block;
     }
 
     .color-picker-overlay {
       position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-    }
-
-    .color-picker-overlay.show {
-      display: flex;
-    }
-
-    .color-picker-inner {
-      background: #ffffff;
-      padding: 12px;
-      border-radius: 10px;
-      max-width: 360px;
-      font-size: 0.95rem;
-      text-align: center;
+      padding: 16px;
+      z-index: 1001;
     }
 
     .color-swatches {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      margin: 10px 0;
-      justify-content: center;
+      gap: 10px;
+      margin: 14px 0;
     }
 
     .color-swatch-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 18px;
-      border: 2px solid #333;
-      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 2px solid #374151;
     }
 
-    .sr-low  { background: #ffd6d6; }
-    .sr-med  { background: #fff3b0; }
-    .sr-high { background: #d7f7d7; }
+    .sr-low  { background: #fee2e2; }
+    .sr-med  { background: #fef3c7; }
+    .sr-high { background: #dcfce7; }
 
-    @media (min-width: 768px) {
-      .controls-touch {
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-
-      .passer-btn {
-        min-width: 82px;
-        min-height: 58px;
-        font-size: 1.25rem;
-      }
-
-      .inline-rating-buttons button {
-        min-width: 70px;
-        font-size: 1.2rem;
-      }
+    @media (max-width: 700px) {
+      body { padding: 10px; }
+      h1 { font-size: 1.45rem; }
+      .passer-btn, .rating-btn, .plus-tile { min-width: 60px; min-height: 50px; }
     }
   </style>
 </head>
 <body>
-  <h1>Volleyball Serve Receive Tracker</h1>
+  <div class="app">
+    <h1>Volleyball Serve Receive Tracker</h1>
+    <div id="message" class="message"></div>
 
-  <div class="row">
-    <div>
-      <label>Team 1 Name:
-        <input id="team1-name" type="text" placeholder="Team 1" />
-      </label>
-    </div>
-    <div>
-      <label>Team 2 Name:
-        <input id="team2-name" type="text" placeholder="Team 2" />
-      </label>
-    </div>
-    <button class="utility-btn" onclick="applyTeamNames()">Set Names</button>
-  </div>
-
-  <div class="set-bar">
-    <strong>Sets:</strong>
-    <div id="set-buttons"></div>
-    <button class="utility-btn" onclick="addSet()">+ Add Set</button>
-    <button id="match-stats-btn" class="utility-btn" onclick="toggleMatchStats()">Show Match Stats</button>
-  </div>
-
-  <div id="message"></div>
-
-  <div class="set-meta">
-    <h3 id="set-meta-title">Set</h3>
-    <div class="set-meta-grid">
-      <div class="set-meta-card">
-        <div class="score-row">
-          <strong>Final Score:</strong>
-          <span id="score-t1-label">Team 1</span>
-          <input id="score-t1" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
-          <span>-</span>
-          <span id="score-t2-label">Team 2</span>
-          <input id="score-t2" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0" />
-          <button class="utility-btn" onclick="saveSetScore()">Save</button>
-          <button class="danger-btn" onclick="clearSetScore()">Clear</button>
+    <div class="banner-grid">
+      <section class="card">
+        <div class="section-title">Sets</div>
+        <div id="set-buttons" class="set-buttons"></div>
+        <div class="actions-wrap">
+          <button class="utility-btn" onclick="addSet()">+ Add Set</button>
+          <button class="utility-btn" onclick="promptEndSet()">End Set</button>
         </div>
-        <div class="muted">Enter scores after the set is complete. Saved per set.</div>
-      </div>
+      </section>
 
-      <div class="set-meta-card">
-        <strong>Timeouts (2 per team / set):</strong>
-        <div style="height:8px;"></div>
+      <section class="card">
+        <div class="section-title">Actions</div>
+        <div class="actions-wrap">
+          <button class="danger-btn" onclick="undo()">Undo</button>
+          <button class="ghost-btn" onclick="openSetup()">Match Setup</button>
+          <button class="ghost-btn" onclick="resetCurrentSet()">Reset Set</button>
+          <button class="danger-btn" onclick="resetAll()">Reset Match</button>
+          <button class="utility-btn" onclick="downloadCSV()">Download CSV</button>
+          <button id="match-stats-btn" class="utility-btn" onclick="toggleMatchStats()">Show Match Stats</button>
+        </div>
+      </section>
+    </div>
 
-        <div class="to-row">
-          <div>
-            <div style="font-weight:bold;" id="to-t1-name">Team 1</div>
-            <div class="to-group">
-              <label class="to-label"><input id="to-t1-1" type="checkbox" />TO1</label>
-              <label class="to-label"><input id="to-t1-2" type="checkbox" />TO2</label>
+    <div class="mini-grid" style="margin-top:12px;">
+      <section class="card">
+        <div class="section-title">Missed Serve Counter</div>
+        <div class="counter-grid" id="missed-serve-box"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Timeout Tracker</div>
+        <div class="timeout-row">
+          <div class="timeout-group">
+            <div id="to-t1-name" style="font-weight:bold;">Team 1</div>
+            <div class="timeout-checks">
+              <label><input id="to-t1-1" type="checkbox" /> TO1</label>
+              <label><input id="to-t1-2" type="checkbox" /> TO2</label>
             </div>
           </div>
 
-          <div>
-            <div style="font-weight:bold;" id="to-t2-name">Team 2</div>
-            <div class="to-group">
-              <label class="to-label"><input id="to-t2-1" type="checkbox" />TO1</label>
-              <label class="to-label"><input id="to-t2-2" type="checkbox" />TO2</label>
+          <div class="timeout-group">
+            <div id="to-t2-name" style="font-weight:bold;">Team 2</div>
+            <div class="timeout-checks">
+              <label><input id="to-t2-1" type="checkbox" /> TO1</label>
+              <label><input id="to-t2-2" type="checkbox" /> TO2</label>
             </div>
           </div>
         </div>
+        <div class="muted" style="margin-top:10px;">These are tracked separately for each set.</div>
+      </section>
+    </div>
 
-        <div class="muted">These checkboxes are tracked separately for each set.</div>
+    <section class="card" style="margin-top:12px;">
+      <div class="section-title">Pass Entry</div>
+      <div id="pass-entry-panels" class="pass-grid"></div>
+    </section>
+
+    <div id="teams-container" class="stats-grid" style="margin-top:12px;"></div>
+
+    <div id="match-summary" class="card match-summary-box"></div>
+  </div>
+
+  <div id="setup-overlay" class="setup-overlay">
+    <div class="setup-modal">
+      <div class="section-title" style="font-size:1.15rem;">Match Setup</div>
+      <div class="muted">Enter both team names and pick colors. This box will disappear after setup.</div>
+
+      <div class="setup-grid">
+        <div class="setup-team">
+          <h3>Team 1</h3>
+          <input id="team1-name" type="text" placeholder="Team 1" />
+          <div class="muted" style="margin-top:10px;">Color</div>
+          <div id="team1-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="setup-team">
+          <h3>Team 2</h3>
+          <input id="team2-name" type="text" placeholder="Team 2" />
+          <div class="muted" style="margin-top:10px;">Color</div>
+          <div id="team2-swatches" class="swatch-row"></div>
+        </div>
+      </div>
+
+      <div class="setup-actions">
+        <button class="ghost-btn" onclick="openColorPicker(1)">More Team 1 Colors</button>
+        <button class="ghost-btn" onclick="openColorPicker(2)">More Team 2 Colors</button>
+        <button class="utility-btn" onclick="applyMatchSetup()">Start Match</button>
       </div>
     </div>
   </div>
 
-  <div class="controls-touch">
-    <section style="flex: 2 1 620px;">
-      <h3>Pass Entry</h3>
-      <div id="pass-entry-panels" class="pass-entry-grid"></div>
-    </section>
-
-    <section style="flex: 1 1 320px;">
-      <h3>Add Players</h3>
-      <div>Enter a jersey number, then choose the team.</div>
-      <div class="team-add-row">
-        <input
-          id="jersey-input"
-          type="tel"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          style="width:90px;"
-          placeholder="#"
-          onkeydown="if(event.key==='Enter'){ addPlayerToTeam(1); }"
-        />
-        <button class="team-add-btn" onclick="addPlayerToTeam(1)" id="add-team1-btn">Add to Team 1</button>
-        <button class="team-add-btn" onclick="addPlayerToTeam(2)" id="add-team2-btn">Add to Team 2</button>
-      </div>
-
-      <div style="margin-top:8px;">
-        <button class="utility-btn" onclick="openColorPicker(1)">Color T1</button>
-        <button class="utility-btn" onclick="openColorPicker(2)">Color T2</button>
-      </div>
-    </section>
-
-    <section style="flex: 1 1 220px;">
-      <h3>Actions</h3>
-      <button class="danger-btn" onclick="undo()">Undo</button><br />
-      <button class="danger-btn" onclick="resetCurrentSet()">Reset Set</button><br />
-      <button class="danger-btn" onclick="resetAll()">Reset Match</button><br />
-      <button class="utility-btn" onclick="downloadCSV()">Download CSV</button>
-    </section>
-  </div>
-
-  <div class="teams" id="teams-container"></div>
-
-  <div id="match-summary" class="match-summary-box"></div>
-
-  <div id="color-picker" class="color-picker-overlay">
+  <div id="color-picker" class="color-picker-overlay hidden">
     <div class="color-picker-inner">
-      <div>Choose color for <span id="color-team-label"></span></div>
+      <div class="section-title">Choose color for <span id="color-team-label"></span></div>
       <div id="color-swatches" class="color-swatches"></div>
-      <button class="utility-btn" onclick="closeColorPicker()">Close</button>
+      <div class="actions-wrap">
+        <button class="utility-btn" onclick="closeColorPicker()">Done</button>
+      </div>
     </div>
   </div>
 
@@ -526,6 +545,7 @@
     var teamColors = { 1: "#BBDEFB", 2: "#C8E6C9" };
     var matchStatsVisible = false;
     var colorPickerTeam = null;
+    var setupComplete = false;
 
     var COLOR_PALETTE = [
       "#BBDEFB", "#1E88E5",
@@ -545,6 +565,7 @@
         name: name,
         totalPasses: 0,
         totalScore: 0,
+        missedServes: 0,
         players: {}
       };
     }
@@ -564,6 +585,7 @@
       currentSetIndex: 0,
       sets: [createEmptySet()],
       ratingPrompt: null,
+      addPlayerTeam: null,
       history: []
     };
 
@@ -582,7 +604,7 @@
     }
 
     function setMessage(msg) {
-      document.getElementById("message").textContent = msg;
+      document.getElementById("message").textContent = msg || "";
     }
 
     function isDarkColor(hex) {
@@ -606,20 +628,63 @@
       return false;
     }
 
-    function applyTeamNames() {
-      var t1 = document.getElementById("team1-name").value.trim();
-      var t2 = document.getElementById("team2-name").value.trim();
-
-      if (t1) teamNames[1] = t1;
-      if (t2) teamNames[2] = t2;
-
+    function syncTeamNamesAcrossSets() {
       for (var i = 0; i < appState.sets.length; i++) {
         appState.sets[i].teams[1].name = teamNames[1];
         appState.sets[i].teams[2].name = teamNames[2];
       }
+    }
 
+    function buildSetupSwatches() {
+      for (var teamId = 1; teamId <= 2; teamId++) {
+        var container = document.getElementById("team" + teamId + "-swatches");
+        container.innerHTML = "";
+        for (var i = 0; i < COLOR_PALETTE.length; i++) {
+          var color = COLOR_PALETTE[i];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "swatch" + (teamColors[teamId] === color ? " active" : "");
+          btn.style.background = color;
+          btn.onclick = (function(t, c) {
+            return function() {
+              teamColors[t] = c;
+              buildSetupSwatches();
+              render();
+            };
+          })(teamId, color);
+          container.appendChild(btn);
+        }
+      }
+    }
+
+    function openSetup() {
+      document.getElementById("team1-name").value = teamNames[1] === "Team 1" ? "" : teamNames[1];
+      document.getElementById("team2-name").value = teamNames[2] === "Team 2" ? "" : teamNames[2];
+      buildSetupSwatches();
+      document.getElementById("setup-overlay").classList.remove("hidden");
+    }
+
+    function closeSetup() {
+      if (!setupComplete) return;
+      document.getElementById("setup-overlay").classList.add("hidden");
+    }
+
+    function applyMatchSetup() {
+      var t1 = document.getElementById("team1-name").value.trim();
+      var t2 = document.getElementById("team2-name").value.trim();
+
+      if (!t1 || !t2) {
+        setMessage("Enter both team names.");
+        return;
+      }
+
+      teamNames[1] = t1;
+      teamNames[2] = t2;
+      syncTeamNamesAcrossSets();
+      setupComplete = true;
+      closeSetup();
       render();
-      setMessage("Team names updated.");
+      setMessage("Match setup saved.");
     }
 
     function renderSetButtons() {
@@ -633,17 +698,15 @@
           var s1 = setObj.score[1] !== "" ? setObj.score[1] : "";
           var s2 = setObj.score[2] !== "" ? setObj.score[2] : "";
           var suffix = (s1 !== "" && s2 !== "") ? " (" + s1 + "-" + s2 + ")" : "";
-
           btn.textContent = "Set " + (idx + 1) + suffix;
-          if (idx === appState.currentSetIndex) btn.className = "active-set";
-
+          if (idx === appState.currentSetIndex) btn.classList.add("active-set");
           btn.onclick = function() {
             appState.currentSetIndex = idx;
             appState.ratingPrompt = null;
+            appState.addPlayerTeam = null;
             render();
             setMessage("Switched to Set " + (idx + 1));
           };
-
           container.appendChild(btn);
         })(i);
       }
@@ -653,12 +716,36 @@
       appState.sets.push(createEmptySet());
       appState.currentSetIndex = appState.sets.length - 1;
       appState.ratingPrompt = null;
+      appState.addPlayerTeam = null;
       render();
       setMessage("Added Set " + (appState.currentSetIndex + 1));
     }
 
+    function promptEndSet() {
+      var setNum = appState.currentSetIndex + 1;
+      var s1 = prompt("Enter " + teamNames[1] + " score for Set " + setNum + ":", currentSet().score[1]);
+      if (s1 === null) return;
+      var s2 = prompt("Enter " + teamNames[2] + " score for Set " + setNum + ":", currentSet().score[2]);
+      if (s2 === null) return;
+
+      if (s1.trim() === "" || s2.trim() === "") {
+        setMessage("Both scores are needed.");
+        return;
+      }
+
+      if (isNaN(parseInt(s1, 10)) || isNaN(parseInt(s2, 10))) {
+        setMessage("Scores must be numbers.");
+        return;
+      }
+
+      currentSet().score[1] = s1.trim();
+      currentSet().score[2] = s2.trim();
+      render();
+      setMessage("Saved Set " + setNum + " score.");
+    }
+
     function resetCurrentSet() {
-      if (!confirm("Reset stats for current set only?")) return;
+      if (!confirm("Reset stats for the current set only?")) return;
 
       var idx = appState.currentSetIndex;
       appState.sets[idx] = createEmptySet();
@@ -671,29 +758,46 @@
       }
       appState.history = newHist;
       appState.ratingPrompt = null;
-
+      appState.addPlayerTeam = null;
       render();
       setMessage("Current set reset.");
     }
 
     function resetAll() {
-      if (!confirm("Reset ALL sets, stats, timeouts, scores, and rosters?")) return;
+      if (!confirm("Reset the full match, all sets, and all rosters?")) return;
 
       appState.sets = [createEmptySet()];
       appState.currentSetIndex = 0;
       appState.ratingPrompt = null;
+      appState.addPlayerTeam = null;
       appState.history = [];
       rosters[1] = [];
       rosters[2] = [];
-
       render();
       setMessage("Match reset.");
     }
 
-    function addPlayerToTeam(teamId) {
-      var input = document.getElementById("jersey-input");
-      var num = input.value.trim();
+    function openAddPlayer(teamId) {
+      appState.ratingPrompt = null;
+      appState.addPlayerTeam = teamId;
+      render();
+      setMessage("Add a passer to " + teamNames[teamId] + ".");
+      setTimeout(function() {
+        var input = document.getElementById("add-player-input-" + teamId);
+        if (input) input.focus();
+      }, 0);
+    }
 
+    function cancelAddPlayer() {
+      appState.addPlayerTeam = null;
+      render();
+    }
+
+    function addPlayerToTeam(teamId) {
+      var input = document.getElementById("add-player-input-" + teamId);
+      if (!input) return;
+
+      var num = input.value.trim();
       if (!num) {
         setMessage("Enter a jersey number first.");
         return;
@@ -714,12 +818,12 @@
         setMessage("Player #" + jersey + " is already on " + teamNames[teamId]);
       }
 
-      input.value = "";
-      input.focus();
+      appState.addPlayerTeam = null;
       render();
     }
 
     function openRatingPrompt(teamId, jersey) {
+      appState.addPlayerTeam = null;
       appState.ratingPrompt = { teamId: teamId, jersey: jersey };
       render();
       setMessage("Rate " + teamNames[teamId] + " player #" + jersey);
@@ -754,6 +858,7 @@
       team.totalScore += rating;
 
       appState.history.push({
+        type: "pass",
         setIndex: setIdx,
         teamId: teamId,
         jersey: jersey,
@@ -763,6 +868,26 @@
       setMessage("+ " + team.name + ", #" + jersey + ", rating " + rating);
     }
 
+    function changeMissedServe(teamId, delta) {
+      var setObj = currentSet();
+      var next = setObj.teams[teamId].missedServes + delta;
+      if (next < 0) next = 0;
+
+      var appliedDelta = next - setObj.teams[teamId].missedServes;
+      if (appliedDelta === 0) return;
+
+      setObj.teams[teamId].missedServes = next;
+      appState.history.push({
+        type: "missedServe",
+        setIndex: appState.currentSetIndex,
+        teamId: teamId,
+        delta: appliedDelta
+      });
+
+      render();
+      setMessage(teamNames[teamId] + " missed serves: " + next);
+    }
+
     function undo() {
       if (appState.history.length === 0) {
         setMessage("Nothing to undo.");
@@ -770,6 +895,16 @@
       }
 
       var last = appState.history.pop();
+
+      if (last.type === "missedServe") {
+        var setObjMs = appState.sets[last.setIndex];
+        setObjMs.teams[last.teamId].missedServes -= last.delta;
+        if (setObjMs.teams[last.teamId].missedServes < 0) setObjMs.teams[last.teamId].missedServes = 0;
+        render();
+        setMessage("Undid missed serve change.");
+        return;
+      }
+
       var setObj = appState.sets[last.setIndex];
       var team = setObj.teams[last.teamId];
       var p = team.players[last.jersey];
@@ -794,63 +929,12 @@
       setMessage("Undid: " + team.name + ", #" + last.jersey + ", rating " + last.rating);
     }
 
-    function renderSetMeta() {
-      var setIdx = appState.currentSetIndex;
-      var setObj = currentSet();
-
-      document.getElementById("set-meta-title").textContent = "Set " + (setIdx + 1) + " (Score + Timeouts)";
-      document.getElementById("score-t1-label").textContent = teamNames[1];
-      document.getElementById("score-t2-label").textContent = teamNames[2];
-      document.getElementById("to-t1-name").textContent = teamNames[1];
-      document.getElementById("to-t2-name").textContent = teamNames[2];
-
-      document.getElementById("score-t1").value = setObj.score[1];
-      document.getElementById("score-t2").value = setObj.score[2];
-
-      document.getElementById("to-t1-1").checked = !!setObj.timeouts[1][0];
-      document.getElementById("to-t1-2").checked = !!setObj.timeouts[1][1];
-      document.getElementById("to-t2-1").checked = !!setObj.timeouts[2][0];
-      document.getElementById("to-t2-2").checked = !!setObj.timeouts[2][1];
-    }
-
-    function saveSetScore() {
-      var setObj = currentSet();
-      var s1 = document.getElementById("score-t1").value.trim();
-      var s2 = document.getElementById("score-t2").value.trim();
-
-      if (s1 !== "" && isNaN(parseInt(s1, 10))) {
-        setMessage("Team 1 score must be a number.");
-        return;
-      }
-
-      if (s2 !== "" && isNaN(parseInt(s2, 10))) {
-        setMessage("Team 2 score must be a number.");
-        return;
-      }
-
-      setObj.score[1] = s1;
-      setObj.score[2] = s2;
-
-      render();
-      setMessage("Saved Set " + (appState.currentSetIndex + 1) + " score.");
-    }
-
-    function clearSetScore() {
-      var setObj = currentSet();
-      setObj.score[1] = "";
-      setObj.score[2] = "";
-
-      render();
-      setMessage("Cleared Set " + (appState.currentSetIndex + 1) + " score.");
-    }
-
     function onTimeoutChange() {
       var setObj = currentSet();
       setObj.timeouts[1][0] = document.getElementById("to-t1-1").checked;
       setObj.timeouts[1][1] = document.getElementById("to-t1-2").checked;
       setObj.timeouts[2][0] = document.getElementById("to-t2-1").checked;
       setObj.timeouts[2][1] = document.getElementById("to-t2-2").checked;
-
       renderMatchSummary();
       setMessage("Timeouts updated for Set " + (appState.currentSetIndex + 1) + ".");
     }
@@ -862,18 +946,83 @@
       document.getElementById("to-t2-2").addEventListener("change", onTimeoutChange);
     }
 
+    function renderMissedServeBox() {
+      var container = document.getElementById("missed-serve-box");
+      container.innerHTML = "";
+
+      for (var teamId = 1; teamId <= 2; teamId++) {
+        var wrap = document.createElement("div");
+        wrap.className = "counter-team";
+
+        var title = document.createElement("h4");
+        title.textContent = teamNames[teamId];
+        wrap.appendChild(title);
+
+        var row = document.createElement("div");
+        row.className = "count-row";
+
+        var minus = document.createElement("button");
+        minus.className = "tiny-btn";
+        minus.textContent = "-1";
+        minus.onclick = (function(t) {
+          return function() { changeMissedServe(t, -1); };
+        })(teamId);
+
+        var value = document.createElement("div");
+        value.className = "count-value";
+        value.textContent = currentSet().teams[teamId].missedServes;
+
+        var plus = document.createElement("button");
+        plus.className = "tiny-btn";
+        plus.textContent = "+1";
+        plus.onclick = (function(t) {
+          return function() { changeMissedServe(t, 1); };
+        })(teamId);
+
+        row.appendChild(minus);
+        row.appendChild(value);
+        row.appendChild(plus);
+        wrap.appendChild(row);
+        container.appendChild(wrap);
+      }
+    }
+
+    function renderTimeoutNames() {
+      document.getElementById("to-t1-name").textContent = teamNames[1];
+      document.getElementById("to-t2-name").textContent = teamNames[2];
+
+      var setObj = currentSet();
+      document.getElementById("to-t1-1").checked = !!setObj.timeouts[1][0];
+      document.getElementById("to-t1-2").checked = !!setObj.timeouts[1][1];
+      document.getElementById("to-t2-1").checked = !!setObj.timeouts[2][0];
+      document.getElementById("to-t2-2").checked = !!setObj.timeouts[2][1];
+    }
+
     function renderPassEntryPanels() {
       var container = document.getElementById("pass-entry-panels");
       container.innerHTML = "";
 
       for (let teamId = 1; teamId <= 2; teamId++) {
         var box = document.createElement("div");
-        box.className = "pass-entry-box";
+        box.className = "pass-box";
         box.style.borderColor = teamColors[teamId];
 
-        var title = document.createElement("h3");
-        title.textContent = teamNames[teamId] + " Passers:";
-        box.appendChild(title);
+        var header = document.createElement("div");
+        header.className = "pass-box-header";
+
+        var title = document.createElement("div");
+        title.innerHTML = "<strong>" + teamNames[teamId] + "</strong><div class='muted'>Tap a player, then tap the pass rating.</div>";
+
+        var colorBtn = document.createElement("button");
+        colorBtn.className = "ghost-btn tiny-btn";
+        colorBtn.textContent = "Color";
+        colorBtn.onclick = function(t) {
+          return function() { openColorPicker(t); };
+        }(teamId);
+
+        header.appendChild(title);
+        header.appendChild(colorBtn);
+        box.appendChild(header);
 
         var content = document.createElement("div");
         content.className = "passer-grid";
@@ -881,68 +1030,118 @@
         var list = rosters[teamId].slice(0);
         list.sort(function(a, b) { return a - b; });
 
-        var promptOpen =
-          appState.ratingPrompt &&
-          appState.ratingPrompt.teamId === teamId;
+        var ratingOpen = appState.ratingPrompt && appState.ratingPrompt.teamId === teamId;
+        var addOpen = appState.addPlayerTeam === teamId;
 
-        if (promptOpen) {
-          var promptWrap = document.createElement("div");
-          promptWrap.className = "inline-rating-wrap";
+        if (ratingOpen) {
+          var ratingPanel = document.createElement("div");
+          ratingPanel.className = "rating-panel";
 
-          var selectedLabel = document.createElement("div");
-          selectedLabel.className = "inline-rating-label";
-          selectedLabel.textContent = "Player #" + appState.ratingPrompt.jersey;
-          promptWrap.appendChild(selectedLabel);
+          var labelTop = document.createElement("div");
+          labelTop.innerHTML = "<strong>Player #" + appState.ratingPrompt.jersey + "</strong>";
+          ratingPanel.appendChild(labelTop);
 
           var label = document.createElement("div");
-          label.className = "inline-rating-label";
+          label.className = "muted";
           label.textContent = "Select Pass Quality:";
-          promptWrap.appendChild(label);
+          ratingPanel.appendChild(label);
 
-          var buttons = document.createElement("div");
-          buttons.className = "inline-rating-buttons";
+          var btnRow = document.createElement("div");
+          btnRow.className = "rating-row";
 
           for (let rating = 0; rating <= 3; rating++) {
             var rateBtn = document.createElement("button");
+            rateBtn.className = "rating-btn";
             rateBtn.textContent = rating;
             rateBtn.onclick = function() {
               rate(teamId, appState.ratingPrompt.jersey, rating);
             };
-            buttons.appendChild(rateBtn);
+            btnRow.appendChild(rateBtn);
           }
 
           var cancelBtn = document.createElement("button");
+          cancelBtn.className = "ghost-btn";
           cancelBtn.textContent = "Cancel";
           cancelBtn.onclick = function() {
             appState.ratingPrompt = null;
             render();
           };
-          buttons.appendChild(cancelBtn);
+          btnRow.appendChild(cancelBtn);
+          ratingPanel.appendChild(btnRow);
+          content.appendChild(ratingPanel);
+        } else if (addOpen) {
+          var addWrap = document.createElement("div");
+          addWrap.className = "inline-add";
+          addWrap.style.width = "100%";
 
-          promptWrap.appendChild(buttons);
-          content.appendChild(promptWrap);
+          var addTitle = document.createElement("div");
+          addTitle.innerHTML = "<strong>Add passer to " + teamNames[teamId] + "</strong>";
+          addWrap.appendChild(addTitle);
+
+          var row = document.createElement("div");
+          row.className = "inline-add-row";
+          row.style.marginTop = "10px";
+
+          var input = document.createElement("input");
+          input.id = "add-player-input-" + teamId;
+          input.type = "tel";
+          input.inputMode = "numeric";
+          input.pattern = "[0-9]*";
+          input.placeholder = "Jersey #";
+          input.onkeydown = function(e) {
+            if (e.key === "Enter") addPlayerToTeam(teamId);
+          };
+
+          var saveBtn = document.createElement("button");
+          saveBtn.className = "utility-btn";
+          saveBtn.textContent = "Add";
+          saveBtn.onclick = function() { addPlayerToTeam(teamId); };
+
+          var cancelBtn2 = document.createElement("button");
+          cancelBtn2.className = "ghost-btn";
+          cancelBtn2.textContent = "Cancel";
+          cancelBtn2.onclick = cancelAddPlayer;
+
+          row.appendChild(input);
+          row.appendChild(saveBtn);
+          row.appendChild(cancelBtn2);
+          addWrap.appendChild(row);
+          content.appendChild(addWrap);
         } else {
           if (list.length === 0) {
+            var plusOnly = document.createElement("button");
+            plusOnly.className = "plus-tile";
+            plusOnly.textContent = "+";
+            plusOnly.onclick = function(t) {
+              return function() { openAddPlayer(t); };
+            }(teamId);
+            content.appendChild(plusOnly);
+
             var empty = document.createElement("div");
-            empty.textContent = "No players yet. Add a jersey below.";
+            empty.className = "muted";
+            empty.style.width = "100%";
+            empty.textContent = "No passers yet. Tap + to add one.";
             content.appendChild(empty);
           } else {
             for (let i = 0; i < list.length; i++) {
               let jersey = list[i];
-
               var btn = document.createElement("button");
               btn.className = "passer-btn";
               btn.textContent = jersey;
-              btn.style.borderColor = teamColors[teamId];
               btn.style.backgroundColor = teamColors[teamId];
+              btn.style.borderColor = teamColors[teamId];
               btn.style.color = getContrastText(teamColors[teamId]);
-
-              btn.onclick = function() {
-                openRatingPrompt(teamId, jersey);
-              };
-
+              btn.onclick = function() { openRatingPrompt(teamId, jersey); };
               content.appendChild(btn);
             }
+
+            var addBtn = document.createElement("button");
+            addBtn.className = "plus-tile";
+            addBtn.textContent = "+";
+            addBtn.onclick = function(t) {
+              return function() { openAddPlayer(t); };
+            }(teamId);
+            content.appendChild(addBtn);
           }
         }
 
@@ -961,25 +1160,25 @@
         var team = setObj.teams[id];
 
         var box = document.createElement("div");
-        box.className = "team-box";
+        box.className = "card team-box";
 
-        var header = document.createElement("div");
-        header.className = "team-header";
+        var head = document.createElement("div");
+        head.className = "team-box-head";
+        head.style.background = teamColors[id];
+        head.style.color = getContrastText(teamColors[id]);
+        head.innerHTML = "<div>" + team.name + "</div><div>SR: " + sr(team.totalScore, team.totalPasses).toFixed(2) + "</div>";
+        box.appendChild(head);
 
-        var nameEl = document.createElement("h2");
-        nameEl.textContent = team.name;
-
-        var srEl = document.createElement("div");
-        srEl.textContent = "SR: " + sr(team.totalScore, team.totalPasses).toFixed(2);
-
-        header.appendChild(nameEl);
-        header.appendChild(srEl);
-        box.appendChild(header);
+        var body = document.createElement("div");
+        body.className = "team-box-body";
 
         var summary = document.createElement("div");
-        summary.className = "team-summary";
-        summary.textContent = "Passes: " + team.totalPasses + " | Total: " + team.totalScore;
-        box.appendChild(summary);
+        summary.style.marginBottom = "10px";
+        summary.innerHTML =
+          "Passes: <strong>" + team.totalPasses + "</strong> &nbsp;|&nbsp; " +
+          "Total: <strong>" + team.totalScore + "</strong> &nbsp;|&nbsp; " +
+          "Missed Serves: <strong>" + team.missedServes + "</strong>";
+        body.appendChild(summary);
 
         var table = document.createElement("table");
         var thead = document.createElement("thead");
@@ -987,12 +1186,10 @@
         table.appendChild(thead);
 
         var tbody = document.createElement("tbody");
-
         var jerseys = [];
+
         for (var key in team.players) {
-          if (team.players.hasOwnProperty(key)) {
-            jerseys.push(parseInt(key, 10));
-          }
+          if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
         }
         jerseys.sort(function(a, b) { return a - b; });
 
@@ -1024,7 +1221,8 @@
         }
 
         table.appendChild(tbody);
-        box.appendChild(table);
+        body.appendChild(table);
+        box.appendChild(body);
         container.appendChild(box);
       }
     }
@@ -1033,16 +1231,16 @@
       var box = document.getElementById("match-summary");
 
       if (!matchStatsVisible) {
-        box.style.display = "none";
+        box.classList.remove("show");
         box.innerHTML = "";
         return;
       }
 
-      box.style.display = "block";
+      box.classList.add("show");
 
       var totals = {
-        1: { passes: 0, score: 0 },
-        2: { passes: 0, score: 0 }
+        1: { passes: 0, score: 0, missedServes: 0 },
+        2: { passes: 0, score: 0, missedServes: 0 }
       };
       var playersAgg = { 1: {}, 2: {} };
 
@@ -1053,17 +1251,13 @@
           var team = setObj.teams[t];
           totals[t].passes += team.totalPasses;
           totals[t].score += team.totalScore;
+          totals[t].missedServes += team.missedServes;
 
           for (var key in team.players) {
             if (team.players.hasOwnProperty(key)) {
               if (!playersAgg[t][key]) {
-                playersAgg[t][key] = {
-                  passes: 0,
-                  score: 0,
-                  counts: [0, 0, 0, 0]
-                };
+                playersAgg[t][key] = { passes: 0, score: 0, counts: [0,0,0,0] };
               }
-
               playersAgg[t][key].passes += team.players[key].total;
               playersAgg[t][key].score += team.players[key].score;
               playersAgg[t][key].counts[0] += team.players[key].counts[0];
@@ -1075,38 +1269,25 @@
         }
       }
 
-      var html = "<strong>Match Totals (All Sets)</strong><br>";
-      html += teamNames[1] + ": Passes " + totals[1].passes + " | Total " + totals[1].score + " | SR " + sr(totals[1].score, totals[1].passes).toFixed(2) + "<br>";
-      html += teamNames[2] + ": Passes " + totals[2].passes + " | Total " + totals[2].score + " | SR " + sr(totals[2].score, totals[2].passes).toFixed(2) + "<br><br>";
-
-      html += "<strong>Set Scores + Timeouts</strong><br>";
-      for (var i = 0; i < appState.sets.length; i++) {
-        var st = appState.sets[i];
-        var a = st.score[1] !== "" ? st.score[1] : "-";
-        var b = st.score[2] !== "" ? st.score[2] : "-";
-        var t1to = (st.timeouts[1][0] ? 1 : 0) + (st.timeouts[1][1] ? 1 : 0);
-        var t2to = (st.timeouts[2][0] ? 1 : 0) + (st.timeouts[2][1] ? 1 : 0);
-
-        html += "Set " + (i + 1) + ": " + a + "-" + b + " | TO " + teamNames[1] + ": " + t1to + "/2, " + teamNames[2] + ": " + t2to + "/2<br>";
-      }
-
-      html += "<br><strong>Players (All Sets)</strong><br>";
-
+      var html = "<div class='section-title'>Match Totals (All Sets)</div>";
       for (var teamId = 1; teamId <= 2; teamId++) {
-        html += "<em>" + teamNames[teamId] + "</em>";
-        html += "<table>";
-        html += "<tr><th>#</th><th>Passes</th><th>SR</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>";
+        html += "<div style='margin-bottom:8px;'><strong>" + teamNames[teamId] + "</strong>: " +
+          "Passes " + totals[teamId].passes +
+          " | Total " + totals[teamId].score +
+          " | SR " + sr(totals[teamId].score, totals[teamId].passes).toFixed(2) +
+          " | Missed Serves " + totals[teamId].missedServes +
+          "</div>";
+
+        html += "<table><thead><tr><th>#</th><th>Passes</th><th>SR</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody>";
 
         var jerseys = [];
-        for (var key2 in playersAgg[teamId]) {
-          if (playersAgg[teamId].hasOwnProperty(key2)) {
-            jerseys.push(parseInt(key2, 10));
-          }
+        for (var jersey in playersAgg[teamId]) {
+          if (playersAgg[teamId].hasOwnProperty(jersey)) jerseys.push(parseInt(jersey, 10));
         }
         jerseys.sort(function(a, b) { return a - b; });
 
         if (jerseys.length === 0) {
-          html += "<tr><td colspan='7'>No passes yet</td></tr>";
+          html += "<tr><td colspan='7'>(no passes yet)</td></tr>";
         } else {
           for (var j2 = 0; j2 < jerseys.length; j2++) {
             var jersey2 = jerseys[j2];
@@ -1123,7 +1304,7 @@
           }
         }
 
-        html += "</table>";
+        html += "</tbody></table>";
       }
 
       box.innerHTML = html;
@@ -1147,6 +1328,7 @@
         btn.onclick = function() {
           if (colorPickerTeam === null) return;
           teamColors[colorPickerTeam] = this.getAttribute("data-color");
+          buildSetupSwatches();
           render();
           closeColorPicker();
         };
@@ -1157,26 +1339,12 @@
     function openColorPicker(teamId) {
       colorPickerTeam = teamId;
       document.getElementById("color-team-label").textContent = teamNames[teamId];
-      document.getElementById("color-picker").classList.add("show");
+      document.getElementById("color-picker").classList.remove("hidden");
     }
 
     function closeColorPicker() {
       colorPickerTeam = null;
-      document.getElementById("color-picker").classList.remove("show");
-    }
-
-    function applyTeamColors() {
-      var addBtn1 = document.getElementById("add-team1-btn");
-      var addBtn2 = document.getElementById("add-team2-btn");
-
-      addBtn1.textContent = "Add to " + teamNames[1];
-      addBtn2.textContent = "Add to " + teamNames[2];
-
-      addBtn1.style.backgroundColor = teamColors[1];
-      addBtn1.style.color = getContrastText(teamColors[1]);
-
-      addBtn2.style.backgroundColor = teamColors[2];
-      addBtn2.style.color = getContrastText(teamColors[2]);
+      document.getElementById("color-picker").classList.add("hidden");
     }
 
     function downloadCSV() {
@@ -1186,6 +1354,7 @@
         "Team",
         "SetScoreFor",
         "SetScoreAgainst",
+        "MissedServes",
         "Timeout1Used",
         "Timeout2Used",
         "Jersey",
@@ -1201,51 +1370,47 @@
       for (var s = 0; s < appState.sets.length; s++) {
         var setObj = appState.sets[s];
 
-        for (var teamId = 1; teamId <= 2; teamId++) {
-          var oppId = teamId === 1 ? 2 : 1;
-          var team = setObj.teams[teamId];
+        for (var t = 1; t <= 2; t++) {
+          var team = setObj.teams[t];
+          var opp = t === 1 ? 2 : 1;
 
           var jerseys = [];
           for (var key in team.players) {
-            if (team.players.hasOwnProperty(key)) {
-              jerseys.push(parseInt(key, 10));
-            }
+            if (team.players.hasOwnProperty(key)) jerseys.push(parseInt(key, 10));
           }
           jerseys.sort(function(a, b) { return a - b; });
 
           if (jerseys.length === 0) {
             rows.push([
-              "Set " + (s + 1),
+              s + 1,
               team.name,
-              setObj.score[teamId],
-              setObj.score[oppId],
-              setObj.timeouts[teamId][0] ? "Yes" : "No",
-              setObj.timeouts[teamId][1] ? "Yes" : "No",
+              setObj.score[t],
+              setObj.score[opp],
+              team.missedServes,
+              setObj.timeouts[t][0],
+              setObj.timeouts[t][1],
               "",
               0,
               0,
-              "0.000",
-              0,
-              0,
-              0,
-              0
+              "0.00",
+              0,0,0,0
             ]);
           } else {
             for (var j = 0; j < jerseys.length; j++) {
               var jersey = jerseys[j];
               var p = team.players[jersey];
-
               rows.push([
-                "Set " + (s + 1),
+                s + 1,
                 team.name,
-                setObj.score[teamId],
-                setObj.score[oppId],
-                setObj.timeouts[teamId][0] ? "Yes" : "No",
-                setObj.timeouts[teamId][1] ? "Yes" : "No",
+                setObj.score[t],
+                setObj.score[opp],
+                team.missedServes,
+                setObj.timeouts[t][0],
+                setObj.timeouts[t][1],
                 jersey,
                 p.total,
                 p.score,
-                sr(p.score, p.total).toFixed(3),
+                sr(p.score, p.total).toFixed(2),
                 p.counts[0],
                 p.counts[1],
                 p.counts[2],
@@ -1256,47 +1421,38 @@
         }
       }
 
-      var csvContent = "";
-      for (var r = 0; r < rows.length; r++) {
-        var line = [];
-        for (var c = 0; c < rows[r].length; c++) {
-          var value = rows[r][c] === undefined || rows[r][c] === null ? "" : String(rows[r][c]);
-          value = '"' + value.replace(/"/g, '""') + '"';
-          line.push(value);
-        }
-        csvContent += line.join(",") + "\n";
-      }
+      var csv = rows.map(function(row) {
+        return row.map(function(cell) {
+          return '"' + String(cell).replace(/"/g, '""') + '"';
+        }).join(",");
+      }).join("\n");
 
-      var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       var url = URL.createObjectURL(blob);
-
       var link = document.createElement("a");
       link.href = url;
-      link.download = "sr_stats.csv";
-      link.style.display = "none";
+      link.download = "volleyball_serve_receive_tracker.csv";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
+      URL.revokeObjectURL(url);
       setMessage("CSV downloaded.");
     }
 
     function render() {
       renderSetButtons();
-      renderSetMeta();
-      applyTeamColors();
+      renderTimeoutNames();
+      renderMissedServeBox();
       renderPassEntryPanels();
       renderTeams();
       renderMatchSummary();
+      buildSetupSwatches();
     }
-
-    document.getElementById("team1-name").value = teamNames[1];
-    document.getElementById("team2-name").value = teamNames[2];
 
     buildColorPicker();
     initTimeoutHandlers();
     render();
+    openSetup();
   </script>
 </body>
 </html>
-
