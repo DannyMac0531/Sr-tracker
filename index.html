@@ -718,6 +718,10 @@
       appState.ratingPrompt = null;
       appState.addPlayerTeam = null;
       render();
+      setTimeout(function() {
+        var nextInput = document.getElementById("add-player-input-" + teamId);
+        if (nextInput) nextInput.focus();
+      }, 0);
       setMessage("Added Set " + (appState.currentSetIndex + 1));
     }
 
@@ -1031,7 +1035,6 @@
         list.sort(function(a, b) { return a - b; });
 
         var ratingOpen = appState.ratingPrompt && appState.ratingPrompt.teamId === teamId;
-        var addOpen = appState.addPlayerTeam === teamId;
 
         if (ratingOpen) {
           var ratingPanel = document.createElement("div");
@@ -1069,81 +1072,55 @@
           btnRow.appendChild(cancelBtn);
           ratingPanel.appendChild(btnRow);
           content.appendChild(ratingPanel);
-        } else if (addOpen) {
-          var addWrap = document.createElement("div");
-          addWrap.className = "inline-add";
-          addWrap.style.width = "100%";
+        }
 
-          var addTitle = document.createElement("div");
-          addTitle.innerHTML = "<strong>Add passer to " + teamNames[teamId] + "</strong>";
-          addWrap.appendChild(addTitle);
-
-          var row = document.createElement("div");
-          row.className = "inline-add-row";
-          row.style.marginTop = "10px";
-
-          var input = document.createElement("input");
-          input.id = "add-player-input-" + teamId;
-          input.type = "tel";
-          input.inputMode = "numeric";
-          input.pattern = "[0-9]*";
-          input.placeholder = "Jersey #";
-          input.onkeydown = function(e) {
-            if (e.key === "Enter") addPlayerToTeam(teamId);
-          };
-
-          var saveBtn = document.createElement("button");
-          saveBtn.className = "utility-btn";
-          saveBtn.textContent = "Add";
-          saveBtn.onclick = function() { addPlayerToTeam(teamId); };
-
-          var cancelBtn2 = document.createElement("button");
-          cancelBtn2.className = "ghost-btn";
-          cancelBtn2.textContent = "Cancel";
-          cancelBtn2.onclick = cancelAddPlayer;
-
-          row.appendChild(input);
-          row.appendChild(saveBtn);
-          row.appendChild(cancelBtn2);
-          addWrap.appendChild(row);
-          content.appendChild(addWrap);
+        if (list.length === 0) {
+          var empty = document.createElement("div");
+          empty.className = "muted";
+          empty.style.width = "100%";
+          empty.textContent = "No passers yet. Type a jersey number below and press Enter.";
+          content.appendChild(empty);
         } else {
-          if (list.length === 0) {
-            var plusOnly = document.createElement("button");
-            plusOnly.className = "plus-tile";
-            plusOnly.textContent = "+";
-            plusOnly.onclick = function(t) {
-              return function() { openAddPlayer(t); };
-            }(teamId);
-            content.appendChild(plusOnly);
-
-            var empty = document.createElement("div");
-            empty.className = "muted";
-            empty.style.width = "100%";
-            empty.textContent = "No passers yet. Tap + to add one.";
-            content.appendChild(empty);
-          } else {
-            for (let i = 0; i < list.length; i++) {
-              let jersey = list[i];
-              var btn = document.createElement("button");
-              btn.className = "passer-btn";
-              btn.textContent = jersey;
-              btn.style.backgroundColor = teamColors[teamId];
-              btn.style.borderColor = teamColors[teamId];
-              btn.style.color = getContrastText(teamColors[teamId]);
-              btn.onclick = function() { openRatingPrompt(teamId, jersey); };
-              content.appendChild(btn);
-            }
-
-            var addBtn = document.createElement("button");
-            addBtn.className = "plus-tile";
-            addBtn.textContent = "+";
-            addBtn.onclick = function(t) {
-              return function() { openAddPlayer(t); };
-            }(teamId);
-            content.appendChild(addBtn);
+          for (let i = 0; i < list.length; i++) {
+            let jersey = list[i];
+            var btn = document.createElement("button");
+            btn.className = "passer-btn";
+            btn.textContent = jersey;
+            btn.style.backgroundColor = teamColors[teamId];
+            btn.style.borderColor = teamColors[teamId];
+            btn.style.color = getContrastText(teamColors[teamId]);
+            btn.onclick = function() { openRatingPrompt(teamId, jersey); };
+            content.appendChild(btn);
           }
         }
+
+        var addWrap = document.createElement("div");
+        addWrap.className = "inline-add";
+        addWrap.style.width = "100%";
+        addWrap.style.marginTop = "10px";
+
+        var row = document.createElement("div");
+        row.className = "inline-add-row";
+
+        var input = document.createElement("input");
+        input.id = "add-player-input-" + teamId;
+        input.type = "tel";
+        input.inputMode = "numeric";
+        input.pattern = "[0-9]*";
+        input.placeholder = "Enter jersey #";
+        input.onkeydown = function(e) {
+          if (e.key === "Enter") addPlayerToTeam(teamId);
+        };
+
+        var saveBtn = document.createElement("button");
+        saveBtn.className = "utility-btn";
+        saveBtn.textContent = "Add";
+        saveBtn.onclick = function() { addPlayerToTeam(teamId); };
+
+        row.appendChild(input);
+        row.appendChild(saveBtn);
+        addWrap.appendChild(row);
+        content.appendChild(addWrap);
 
         box.appendChild(content);
         container.appendChild(box);
