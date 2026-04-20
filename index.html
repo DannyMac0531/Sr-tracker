@@ -34,18 +34,45 @@
       margin: 0 auto;
     }
 
+    .sticky-shell {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding-top: 8px;
+      background: linear-gradient(to bottom, rgba(238,242,246,0.98), rgba(238,242,246,0.92), rgba(238,242,246,0.82), rgba(238,242,246,0));
+      backdrop-filter: blur(8px);
+      margin-bottom: 8px;
+    }
+
     h1 {
-      margin: 0 0 12px 0;
+      margin: 0 0 10px 0;
       text-align: center;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
     }
 
     .message {
       min-height: 1.2em;
-      margin: 8px 0 14px;
-      font-size: 0.95rem;
+      margin: 8px 0 10px;
+      font-size: 1rem;
       font-weight: bold;
       text-align: center;
+    }
+
+    .status-strip {
+      display: none;
+      margin: 0 0 10px 0;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 2px solid var(--blue-dark);
+      background: #dbeafe;
+      color: #0f172a;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .status-strip.show {
+      display: block;
     }
 
     .card {
@@ -54,6 +81,10 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 14px;
+    }
+
+    .top-card {
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
     }
 
     .banner-grid,
@@ -110,9 +141,10 @@
     }
 
     .tiny-btn {
-      min-width: 44px;
+      min-width: 54px;
+      min-height: 54px;
       padding: 8px 10px;
-      font-size: 1rem;
+      font-size: 1.05rem;
     }
 
     input {
@@ -202,9 +234,11 @@
     }
 
     .set-buttons button.active-set {
-      background: var(--blue);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: #fff;
       border-color: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
     }
 
     .actions-wrap {
@@ -309,18 +343,20 @@
 
     .passer-btn,
     .rating-btn {
-      min-width: 68px;
-      min-height: 54px;
-      font-size: 1.15rem;
+      min-width: 84px;
+      min-height: 68px;
+      font-size: 1.35rem;
       border-width: 2px;
+      border-radius: 16px;
     }
 
     .plus-tile {
-      min-width: 68px;
-      min-height: 54px;
-      font-size: 1.3rem;
+      min-width: 84px;
+      min-height: 68px;
+      font-size: 1.4rem;
       background: #fff;
       border-style: dashed;
+      border-radius: 16px;
     }
 
     .rating-panel {
@@ -356,7 +392,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.88rem;
+      font-size: 0.92rem;
     }
 
     th, td {
@@ -367,6 +403,9 @@
 
     th {
       background: #f3f4f6;
+      position: sticky;
+      top: 0;
+      z-index: 2;
     }
 
     .team-box {
@@ -426,20 +465,56 @@
     .sr-med  { background: #fef3c7; }
     .sr-high { background: #dcfce7; }
 
+    .collapse-btn {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 14px;
+    }
+
+    .collapse-panel.hidden {
+      display: none;
+    }
+
+    .stats-table-wrap {
+      max-height: 360px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .flash {
+      animation: pulseFlash 0.7s ease-out;
+    }
+
+    @keyframes pulseFlash {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); }
+      35% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37,99,235,0.12); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); }
+    }
+
+
     @media (max-width: 700px) {
       body { padding: 10px; }
       h1 { font-size: 1.45rem; }
-      .passer-btn, .rating-btn, .plus-tile { min-width: 60px; min-height: 50px; }
+      .passer-btn, .rating-btn, .plus-tile { min-width: 74px; min-height: 60px; }
+      .sticky-shell { top: 0; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1>Volleyball Serve Receive Tracker</h1>
-    <div id="message" class="message"></div>
+    <div class="sticky-shell">
+      <h1>Volleyball Serve Receive Tracker</h1>
+      <div id="message" class="message"></div>
+      <div id="status-strip" class="status-strip"></div>
 
     <div class="banner-grid">
-      <section class="card">
+      <section class="card top-card">
         <div class="section-title">Sets</div>
         <div id="set-buttons" class="set-buttons"></div>
         <div class="actions-wrap">
@@ -448,17 +523,18 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card top-card">
         <div class="section-title">Actions</div>
         <div class="actions-wrap">
           <button class="danger-btn" onclick="undo()">Undo</button>
           <button class="ghost-btn" onclick="openSetup()">Match Setup</button>
           <button class="ghost-btn" onclick="resetCurrentSet()">Reset Set</button>
           <button class="danger-btn" onclick="resetAll()">Reset Match</button>
-          <button class="utility-btn" onclick="downloadCSV()">Download CSV</button>
           <button id="match-stats-btn" class="utility-btn" onclick="toggleMatchStats()">Show Match Stats</button>
         </div>
+        <div class="muted" id="autosave-indicator" style="margin-top:10px;">Autosave on</div>
       </section>
+    </div>
     </div>
 
     <div class="mini-grid" style="margin-top:12px;">
@@ -495,7 +571,16 @@
       <div id="pass-entry-panels" class="pass-grid"></div>
     </section>
 
-    <div id="teams-container" class="stats-grid" style="margin-top:12px;"></div>
+    <div style="margin-top:12px;">
+      <button id="stats-collapse-btn" class="collapse-btn" onclick="toggleStatsCollapsed()">
+        <span><strong>Tracked Stats</strong></span>
+        <span id="stats-collapse-label">Hide</span>
+      </button>
+    </div>
+
+    <div id="stats-panel" class="collapse-panel">
+      <div id="teams-container" class="stats-grid" style="margin-top:12px;"></div>
+    </div>
 
     <div id="match-summary" class="card match-summary-box"></div>
   </div>
@@ -546,6 +631,10 @@
     var matchStatsVisible = false;
     var colorPickerTeam = null;
     var setupComplete = false;
+    var statsCollapsed = false;
+    var autosaveTimer = null;
+    var lastFlashTimer = null;
+    var STORAGE_KEY = "volleyballServeReceiveTrackerStateV2";
 
     var COLOR_PALETTE = [
       "#BBDEFB", "#1E88E5",
@@ -585,7 +674,6 @@
       currentSetIndex: 0,
       sets: [createEmptySet()],
       ratingPrompt: null,
-      addPlayerTeam: null,
       history: []
     };
 
@@ -605,6 +693,85 @@
 
     function setMessage(msg) {
       document.getElementById("message").textContent = msg || "";
+    }
+
+    function showStatusStrip(text, teamId) {
+      var el = document.getElementById("status-strip");
+      if (!text) {
+        el.classList.remove("show");
+        el.textContent = "";
+        el.style.background = "#dbeafe";
+        el.style.borderColor = "#1d4ed8";
+        return;
+      }
+      el.textContent = text;
+      el.classList.add("show");
+      if (teamId && teamColors[teamId]) {
+        el.style.background = teamColors[teamId];
+        el.style.color = getContrastText(teamColors[teamId]);
+        el.style.borderColor = teamColors[teamId];
+      } else {
+        el.style.background = "#dbeafe";
+        el.style.color = "#0f172a";
+        el.style.borderColor = "#1d4ed8";
+      }
+    }
+
+    function flashSelectedArea() {
+      var el = document.getElementById("status-strip");
+      el.classList.remove("flash");
+      void el.offsetWidth;
+      el.classList.add("flash");
+      if (lastFlashTimer) clearTimeout(lastFlashTimer);
+      lastFlashTimer = setTimeout(function() {
+        el.classList.remove("flash");
+      }, 800);
+    }
+
+    function scheduleAutosave() {
+      if (autosaveTimer) clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(saveState, 120);
+    }
+
+    function saveState() {
+      var payload = {
+        teamNames: teamNames,
+        rosters: rosters,
+        teamColors: teamColors,
+        matchStatsVisible: matchStatsVisible,
+        setupComplete: setupComplete,
+        statsCollapsed: statsCollapsed,
+        appState: appState
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      var ind = document.getElementById("autosave-indicator");
+      if (ind) ind.textContent = "Autosaved";
+      setTimeout(function() {
+        var ind2 = document.getElementById("autosave-indicator");
+        if (ind2) ind2.textContent = "Autosave on";
+      }, 900);
+    }
+
+    function loadState() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        var data = JSON.parse(raw);
+        if (!data || !data.appState || !data.appState.sets) return false;
+        teamNames = data.teamNames || teamNames;
+        rosters = data.rosters || rosters;
+        teamColors = data.teamColors || teamColors;
+        matchStatsVisible = !!data.matchStatsVisible;
+        setupComplete = !!data.setupComplete;
+        statsCollapsed = !!data.statsCollapsed;
+        appState = data.appState;
+        if (typeof appState.currentSetIndex !== "number") appState.currentSetIndex = 0;
+        if (!appState.history) appState.history = [];
+        if (!appState.sets || !appState.sets.length) appState.sets = [createEmptySet()];
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
 
     function isDarkColor(hex) {
@@ -650,6 +817,7 @@
               teamColors[t] = c;
               buildSetupSwatches();
               render();
+              scheduleAutosave();
             };
           })(teamId, color);
           container.appendChild(btn);
@@ -684,6 +852,7 @@
       setupComplete = true;
       closeSetup();
       render();
+      scheduleAutosave();
       setMessage("Match setup saved.");
     }
 
@@ -703,7 +872,6 @@
           btn.onclick = function() {
             appState.currentSetIndex = idx;
             appState.ratingPrompt = null;
-            appState.addPlayerTeam = null;
             render();
             setMessage("Switched to Set " + (idx + 1));
           };
@@ -716,8 +884,8 @@
       appState.sets.push(createEmptySet());
       appState.currentSetIndex = appState.sets.length - 1;
       appState.ratingPrompt = null;
-      appState.addPlayerTeam = null;
       render();
+      scheduleAutosave();
       setMessage("Added Set " + (appState.currentSetIndex + 1));
     }
 
@@ -741,11 +909,16 @@
       currentSet().score[1] = s1.trim();
       currentSet().score[2] = s2.trim();
       render();
+      scheduleAutosave();
       setMessage("Saved Set " + setNum + " score.");
     }
 
     function resetCurrentSet() {
-      if (!confirm("Reset stats for the current set only?")) return;
+      var confirmText = prompt('Type RESET to clear the current set.');
+      if (confirmText !== "RESET") {
+        setMessage("Reset canceled.");
+        return;
+      }
 
       var idx = appState.currentSetIndex;
       appState.sets[idx] = createEmptySet();
@@ -758,40 +931,29 @@
       }
       appState.history = newHist;
       appState.ratingPrompt = null;
-      appState.addPlayerTeam = null;
       render();
+      scheduleAutosave();
       setMessage("Current set reset.");
     }
 
     function resetAll() {
-      if (!confirm("Reset the full match, all sets, and all rosters?")) return;
+      var confirmText = prompt('Type RESET MATCH to clear the full match.');
+      if (confirmText !== "RESET MATCH") {
+        setMessage("Reset canceled.");
+        return;
+      }
 
       appState.sets = [createEmptySet()];
       appState.currentSetIndex = 0;
       appState.ratingPrompt = null;
-      appState.addPlayerTeam = null;
       appState.history = [];
       rosters[1] = [];
       rosters[2] = [];
       render();
+      scheduleAutosave();
       setMessage("Match reset.");
     }
 
-    function openAddPlayer(teamId) {
-      appState.ratingPrompt = null;
-      appState.addPlayerTeam = teamId;
-      render();
-      setMessage("Add a passer to " + teamNames[teamId] + ".");
-      setTimeout(function() {
-        var input = document.getElementById("add-player-input-" + teamId);
-        if (input) input.focus();
-      }, 0);
-    }
-
-    function cancelAddPlayer() {
-      appState.addPlayerTeam = null;
-      render();
-    }
 
     function addPlayerToTeam(teamId) {
       var input = document.getElementById("add-player-input-" + teamId);
@@ -814,27 +976,23 @@
         list.push(jersey);
         list.sort(function(a, b) { return a - b; });
         setMessage("Player #" + jersey + " added to " + teamNames[teamId]);
+        input.value = "";
+        scheduleAutosave();
+        render();
+        setTimeout(function() {
+          var fresh = document.getElementById("add-player-input-" + teamId);
+          if (fresh) fresh.focus();
+        }, 0);
       } else {
         setMessage("Player #" + jersey + " is already on " + teamNames[teamId]);
       }
-
-      input.value = "";
-      appState.addPlayerTeam = null;
-      render();
-      setTimeout(function() {
-        var nextInput = document.getElementById("add-player-input-" + teamId);
-        if (nextInput) nextInput.focus();
-      }, 0);
     }
 
     function openRatingPrompt(teamId, jersey) {
-      appState.addPlayerTeam = null;
-      appState.ratingPrompt = {
-        teamId: Number(teamId),
-        jersey: Number(jersey),
-        nonce: Date.now()
-      };
+      appState.ratingPrompt = { teamId: teamId, jersey: jersey };
       render();
+      showStatusStrip("Tracking " + teamNames[teamId] + " #" + jersey, teamId);
+      flashSelectedArea();
       setMessage("Rate " + teamNames[teamId] + " player #" + jersey);
     }
 
@@ -842,6 +1000,7 @@
       if (rating < 0 || rating > 3) return;
       addPass(teamId, jersey, rating);
       appState.ratingPrompt = null;
+      showStatusStrip("");
       render();
     }
 
@@ -894,6 +1053,7 @@
       });
 
       render();
+      scheduleAutosave();
       setMessage(teamNames[teamId] + " missed serves: " + next);
     }
 
@@ -910,6 +1070,7 @@
         setObjMs.teams[last.teamId].missedServes -= last.delta;
         if (setObjMs.teams[last.teamId].missedServes < 0) setObjMs.teams[last.teamId].missedServes = 0;
         render();
+        scheduleAutosave();
         setMessage("Undid missed serve change.");
         return;
       }
@@ -935,6 +1096,7 @@
 
       appState.ratingPrompt = null;
       render();
+      scheduleAutosave();
       setMessage("Undid: " + team.name + ", #" + last.jersey + ", rating " + last.rating);
     }
 
@@ -945,6 +1107,7 @@
       setObj.timeouts[2][0] = document.getElementById("to-t2-1").checked;
       setObj.timeouts[2][1] = document.getElementById("to-t2-2").checked;
       renderMatchSummary();
+      scheduleAutosave();
       setMessage("Timeouts updated for Set " + (appState.currentSetIndex + 1) + ".");
     }
 
@@ -1007,6 +1170,7 @@
       document.getElementById("to-t2-2").checked = !!setObj.timeouts[2][1];
     }
 
+
     function renderPassEntryPanels() {
       var container = document.getElementById("pass-entry-panels");
       container.innerHTML = "";
@@ -1020,10 +1184,9 @@
         header.className = "pass-box-header";
 
         var title = document.createElement("div");
-        title.innerHTML = "<strong>" + teamNames[teamId] + "</strong><div class='muted'>Tap a player, then tap the pass rating.</div>";
+        title.innerHTML = "<strong>" + teamNames[teamId] + "</strong><div class='muted'>Type a jersey below to add players. Tap a player, then tap the pass rating.</div>";
 
         var colorBtn = document.createElement("button");
-        colorBtn.type = "button";
         colorBtn.className = "ghost-btn tiny-btn";
         colorBtn.textContent = "Color";
         colorBtn.onclick = function(t) {
@@ -1040,12 +1203,11 @@
         var list = rosters[teamId].slice(0);
         list.sort(function(a, b) { return a - b; });
 
-        var ratingOpen = appState.ratingPrompt && Number(appState.ratingPrompt.teamId) === Number(teamId);
+        var ratingOpen = appState.ratingPrompt && appState.ratingPrompt.teamId === teamId;
 
         if (ratingOpen) {
           var ratingPanel = document.createElement("div");
           ratingPanel.className = "rating-panel";
-          ratingPanel.style.width = "100%";
 
           var labelTop = document.createElement("div");
           labelTop.innerHTML = "<strong>Player #" + appState.ratingPrompt.jersey + "</strong>";
@@ -1061,7 +1223,6 @@
 
           for (let rating = 0; rating <= 3; rating++) {
             var rateBtn = document.createElement("button");
-            rateBtn.type = "button";
             rateBtn.className = "rating-btn";
             rateBtn.textContent = rating;
             rateBtn.onclick = function() {
@@ -1071,15 +1232,14 @@
           }
 
           var cancelBtn = document.createElement("button");
-          cancelBtn.type = "button";
           cancelBtn.className = "ghost-btn";
           cancelBtn.textContent = "Cancel";
           cancelBtn.onclick = function() {
             appState.ratingPrompt = null;
+            showStatusStrip("");
             render();
           };
           btnRow.appendChild(cancelBtn);
-
           ratingPanel.appendChild(btnRow);
           content.appendChild(ratingPanel);
         } else {
@@ -1087,31 +1247,29 @@
             var empty = document.createElement("div");
             empty.className = "muted";
             empty.style.width = "100%";
-            empty.textContent = "No passers yet. Type a jersey number below and press Enter.";
+            empty.textContent = "No passers yet.";
             content.appendChild(empty);
           } else {
             for (let i = 0; i < list.length; i++) {
               let jersey = list[i];
               var btn = document.createElement("button");
-              btn.type = "button";
               btn.className = "passer-btn";
               btn.textContent = jersey;
               btn.style.backgroundColor = teamColors[teamId];
               btn.style.borderColor = teamColors[teamId];
               btn.style.color = getContrastText(teamColors[teamId]);
               btn.onclick = function() { openRatingPrompt(teamId, jersey); };
-              btn.onpointerdown = function(e) {
-                e.preventDefault();
-                openRatingPrompt(teamId, jersey);
-              };
               content.appendChild(btn);
             }
           }
+        }
 
+        box.appendChild(content);
+
+        if (!ratingOpen) {
           var addWrap = document.createElement("div");
           addWrap.className = "inline-add";
           addWrap.style.width = "100%";
-          addWrap.style.marginTop = "10px";
 
           var row = document.createElement("div");
           row.className = "inline-add-row";
@@ -1121,17 +1279,21 @@
           input.type = "tel";
           input.inputMode = "numeric";
           input.pattern = "[0-9]*";
-          input.placeholder = "Add " + teamNames[teamId] + " #";
+          input.placeholder = "Add jersey #";
           input.onkeydown = function(e) {
             if (e.key === "Enter") addPlayerToTeam(teamId);
           };
 
-          row.appendChild(input);
+          var hint = document.createElement("div");
+          hint.className = "muted";
+          hint.textContent = "Press Enter after each number.";
+
           addWrap.appendChild(row);
-          content.appendChild(addWrap);
+          row.appendChild(input);
+          addWrap.appendChild(hint);
+          box.appendChild(addWrap);
         }
 
-        box.appendChild(content);
         container.appendChild(box);
       }
     }
@@ -1207,7 +1369,10 @@
         }
 
         table.appendChild(tbody);
-        body.appendChild(table);
+        var tableWrap = document.createElement("div");
+        tableWrap.className = "stats-table-wrap";
+        tableWrap.appendChild(table);
+        body.appendChild(tableWrap);
         box.appendChild(body);
         container.appendChild(box);
       }
@@ -1264,7 +1429,7 @@
           " | Missed Serves " + totals[teamId].missedServes +
           "</div>";
 
-        html += "<table><thead><tr><th>#</th><th>Passes</th><th>SR</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody>";
+        html += "<div class='stats-table-wrap'><table><thead><tr><th>#</th><th>Passes</th><th>SR</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody>";
 
         var jerseys = [];
         for (var jersey in playersAgg[teamId]) {
@@ -1290,7 +1455,7 @@
           }
         }
 
-        html += "</tbody></table>";
+        html += "</tbody></table></div>";
       }
 
       box.innerHTML = html;
@@ -1300,6 +1465,26 @@
       matchStatsVisible = !matchStatsVisible;
       document.getElementById("match-stats-btn").textContent = matchStatsVisible ? "Hide Match Stats" : "Show Match Stats";
       renderMatchSummary();
+      scheduleAutosave();
+    }
+
+
+    function toggleStatsCollapsed() {
+      statsCollapsed = !statsCollapsed;
+      renderStatsPanel();
+      scheduleAutosave();
+    }
+
+    function renderStatsPanel() {
+      var panel = document.getElementById("stats-panel");
+      var label = document.getElementById("stats-collapse-label");
+      if (statsCollapsed) {
+        panel.classList.add("hidden");
+        label.textContent = "Show";
+      } else {
+        panel.classList.remove("hidden");
+        label.textContent = "Hide";
+      }
     }
 
     function buildColorPicker() {
@@ -1317,6 +1502,7 @@
           buildSetupSwatches();
           render();
           closeColorPicker();
+          scheduleAutosave();
         };
         container.appendChild(btn);
       }
@@ -1432,13 +1618,27 @@
       renderPassEntryPanels();
       renderTeams();
       renderMatchSummary();
+      renderStatsPanel();
       buildSetupSwatches();
+
+      if (appState.ratingPrompt) {
+        showStatusStrip("Tracking " + teamNames[appState.ratingPrompt.teamId] + " #" + appState.ratingPrompt.jersey, appState.ratingPrompt.teamId);
+      } else {
+        showStatusStrip("");
+      }
+
+      document.getElementById("match-stats-btn").textContent = matchStatsVisible ? "Hide Match Stats" : "Show Match Stats";
     }
 
+    loadState();
     buildColorPicker();
     initTimeoutHandlers();
     render();
-    openSetup();
+    if (setupComplete) {
+      closeSetup();
+    } else {
+      openSetup();
+    }
   </script>
 </body>
 </html>
