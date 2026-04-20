@@ -389,6 +389,64 @@
       max-width: 120px;
     }
 
+    .team-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 0 12px;
+    }
+
+    .team-tool-card {
+      border: 1px solid #dbe2ea;
+      border-radius: 16px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+
+    .team-tool-card .tool-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .timeout-checks {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .timeout-checks label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+    }
+
+    .timeout-checks input {
+      transform: scale(1.25);
+    }
+
+    .counter-team.compact {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .counter-team.compact h4 {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+      .team-tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -537,39 +595,9 @@
     </div>
     </div>
 
-    <div class="mini-grid" style="margin-top:12px;">
-      <section class="card">
-        <div class="section-title">Missed Serve Counter</div>
-        <div class="counter-grid" id="missed-serve-box"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-title">Timeout Tracker</div>
-        <div class="timeout-row">
-          <div class="timeout-group">
-            <div id="to-t1-name" style="font-weight:bold;">Team 1</div>
-            <div class="timeout-checks">
-              <label><input id="to-t1-1" type="checkbox" /> TO1</label>
-              <label><input id="to-t1-2" type="checkbox" /> TO2</label>
-            </div>
-          </div>
-
-          <div class="timeout-group">
-            <div id="to-t2-name" style="font-weight:bold;">Team 2</div>
-            <div class="timeout-checks">
-              <label><input id="to-t2-1" type="checkbox" /> TO1</label>
-              <label><input id="to-t2-2" type="checkbox" /> TO2</label>
-            </div>
-          </div>
-        </div>
-        <div class="muted" style="margin-top:10px;">These are tracked separately for each set.</div>
-      </section>
-    </div>
-
-    <section class="card" style="margin-top:12px;">
-      <div class="section-title">Pass Entry</div>
+    <div style="margin-top:12px;">
       <div id="pass-entry-panels" class="pass-grid"></div>
-    </section>
+    </div>
 
     <div style="margin-top:12px;">
       <button id="stats-collapse-btn" class="collapse-btn" onclick="toggleStatsCollapsed()">
@@ -1174,6 +1202,7 @@
     function renderPassEntryPanels() {
       var container = document.getElementById("pass-entry-panels");
       container.innerHTML = "";
+      var setObj = currentSet();
 
       for (let teamId = 1; teamId <= 2; teamId++) {
         var box = document.createElement("div");
@@ -1184,7 +1213,7 @@
         header.className = "pass-box-header";
 
         var title = document.createElement("div");
-        title.innerHTML = "<strong>" + teamNames[teamId] + "</strong><div class='muted'>Type a jersey below to add players. Tap a player, then tap the pass rating.</div>";
+        title.innerHTML = "<strong>" + teamNames[teamId] + "</strong><div class='muted'>Passers, missed serves, and timeouts together on one side.</div>";
 
         var colorBtn = document.createElement("button");
         colorBtn.className = "ghost-btn tiny-btn";
@@ -1196,6 +1225,78 @@
         header.appendChild(title);
         header.appendChild(colorBtn);
         box.appendChild(header);
+
+        var toolsGrid = document.createElement("div");
+        toolsGrid.className = "team-tools-grid";
+
+        var missedCard = document.createElement("div");
+        missedCard.className = "team-tool-card";
+        var missedLabel = document.createElement("div");
+        missedLabel.className = "tool-label";
+        missedLabel.textContent = "Missed Serves";
+        missedCard.appendChild(missedLabel);
+
+        var countWrap = document.createElement("div");
+        countWrap.className = "counter-team compact";
+        var countRow = document.createElement("div");
+        countRow.className = "count-row";
+
+        var minus = document.createElement("button");
+        minus.className = "tiny-btn";
+        minus.textContent = "-1";
+        minus.onclick = (function(t) {
+          return function() { changeMissedServe(t, -1); };
+        })(teamId);
+
+        var value = document.createElement("div");
+        value.className = "count-value";
+        value.textContent = setObj.teams[teamId].missedServes;
+
+        var plus = document.createElement("button");
+        plus.className = "tiny-btn";
+        plus.textContent = "+1";
+        plus.onclick = (function(t) {
+          return function() { changeMissedServe(t, 1); };
+        })(teamId);
+
+        countRow.appendChild(minus);
+        countRow.appendChild(value);
+        countRow.appendChild(plus);
+        countWrap.appendChild(countRow);
+        missedCard.appendChild(countWrap);
+        toolsGrid.appendChild(missedCard);
+
+        var timeoutCard = document.createElement("div");
+        timeoutCard.className = "team-tool-card";
+        var timeoutLabel = document.createElement("div");
+        timeoutLabel.className = "tool-label";
+        timeoutLabel.textContent = "Timeouts";
+        timeoutCard.appendChild(timeoutLabel);
+
+        var timeoutChecks = document.createElement("div");
+        timeoutChecks.className = "timeout-checks";
+        for (let idx = 0; idx < 2; idx++) {
+          var label = document.createElement("label");
+          var checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = !!setObj.timeouts[teamId][idx];
+          checkbox.onchange = function(t, i) {
+            return function(e) {
+              var setNow = currentSet();
+              setNow.timeouts[t][i] = e.target.checked;
+              renderMatchSummary();
+              scheduleAutosave();
+              setMessage(teamNames[t] + " timeout " + (i + 1) + (e.target.checked ? " used." : " cleared."));
+            };
+          }(teamId, idx);
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode("TO" + (idx + 1)));
+          timeoutChecks.appendChild(label);
+        }
+        timeoutCard.appendChild(timeoutChecks);
+        toolsGrid.appendChild(timeoutCard);
+
+        box.appendChild(toolsGrid);
 
         var content = document.createElement("div");
         content.className = "passer-grid";
@@ -1613,8 +1714,6 @@
 
     function render() {
       renderSetButtons();
-      renderTimeoutNames();
-      renderMissedServeBox();
       renderPassEntryPanels();
       renderTeams();
       renderMatchSummary();
@@ -1632,7 +1731,6 @@
 
     loadState();
     buildColorPicker();
-    initTimeoutHandlers();
     render();
     if (setupComplete) {
       closeSetup();
