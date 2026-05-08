@@ -965,23 +965,39 @@
     }
 
     function resetAll() {
-      var confirmText = prompt('Type RESET MATCH to clear the full match.');
-      if (confirmText !== "RESET MATCH") {
-        setMessage("Reset canceled.");
-        return;
-      }
+  var confirmText = prompt('Type RESET MATCH to clear the full match.');
+  if (confirmText !== "RESET MATCH") {
+    setMessage("Reset canceled.");
+    return;
+  }
 
-      appState.sets = [createEmptySet()];
-      appState.currentSetIndex = 0;
-      appState.ratingPrompt = null;
-      appState.history = [];
-      rosters[1] = [];
-      rosters[2] = [];
-      render();
-      scheduleAutosave();
-      setMessage("Match reset.");
-    }
+  // Clear saved browser data first
+  localStorage.removeItem(STORAGE_KEY);
 
+  // Reset team setup
+  teamNames = { 1: "Team 1", 2: "Team 2" };
+  rosters = { 1: [], 2: [] };
+  teamColors = { 1: "#BBDEFB", 2: "#C8E6C9" };
+  matchStatsVisible = false;
+  setupComplete = false;
+  statsCollapsed = false;
+
+  // Reset app data
+  appState = {
+    currentSetIndex: 0,
+    sets: [createEmptySet()],
+    ratingPrompt: null,
+    history: []
+  };
+
+  render();
+  openSetup();
+
+  // Save the clean reset state
+  saveState();
+
+  setMessage("Full match reset.");
+}
 
     function addPlayerToTeam(teamId) {
       var input = document.getElementById("add-player-input-" + teamId);
